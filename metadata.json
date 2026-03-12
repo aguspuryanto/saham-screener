@@ -1,0 +1,5 @@
+{
+  "name": "StockBro Screener",
+  "description": "A stock screening application based on StockBro's analysis guide, featuring technical and fundamental filters.",
+  "requestFramePermissions": []
+}
