@@ -6,6 +6,14 @@ import { StockCard } from './StockCard';
 import { Search, SlidersHorizontal, RefreshCw } from 'lucide-react';
 import { NotificationModal, NotificationSetting } from './NotificationModal';
 
+type SortField = 'ticker' | 'name' | 'price' | 'percentChange';
+type SortDirection = 'asc' | 'desc';
+
+interface SortConfig {
+  field: SortField;
+  direction: SortDirection;
+}
+
 export function ScreenerPage() {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [filteredStocks, setFilteredStocks] = useState<Stock[]>([]);
@@ -14,6 +22,7 @@ export function ScreenerPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ field: 'ticker', direction: 'asc' });
   
   const [notifications, setNotifications] = useState<Record<string, NotificationSetting>>(() => {
     const saved = localStorage.getItem('stock_notifications');
@@ -24,6 +33,7 @@ export function ScreenerPage() {
   const [filters, setFilters] = useState<FilterOptions>({
     recommendation: [],
     strategy: [],
+    industry: [],
     undervalued: false,
     oversold: false,
     goldenCross: false,
@@ -54,6 +64,9 @@ export function ScreenerPage() {
       
       // Check notifications
       if (isRefresh) {
+        let notificationsChanged = false;
+        const newNotifications = { ...notifications };
+        
         Object.values(notifications).forEach((setting: NotificationSetting) => {
           const stock = data.find(s => s.id === setting.stockId);
           if (stock) {
@@ -62,11 +75,20 @@ export function ScreenerPage() {
 
             if (stock.lastClose >= upPrice) {
               showBrowserNotification(`🚀 ${stock.ticker} is UP!`, `Price reached Rp ${stock.lastClose.toLocaleString('id-ID')} (+${setting.upThresholdPercent}%)`);
+              delete newNotifications[setting.stockId];
+              notificationsChanged = true;
             } else if (stock.lastClose <= downPrice) {
               showBrowserNotification(`📉 ${stock.ticker} is DOWN!`, `Price dropped to Rp ${stock.lastClose.toLocaleString('id-ID')} (-${setting.downThresholdPercent}%)`);
+              delete newNotifications[setting.stockId];
+              notificationsChanged = true;
             }
           }
         });
+        
+        if (notificationsChanged) {
+          setNotifications(newNotifications);
+          localStorage.setItem('stock_notifications', JSON.stringify(newNotifications));
+        }
       }
     } catch (error) {
       console.error('Failed to fetch stocks', error);
@@ -114,6 +136,11 @@ export function ScreenerPage() {
       result = result.filter(s => filters.strategy.includes(s.strategy));
     }
 
+    // Industry filter
+    if (filters.industry.length > 0) {
+      result = result.filter(s => filters.industry.includes(s.sector));
+    }
+
     // Undervalued filter
     if (filters.undervalued) {
       result = result.filter(s => s.dcf.status === 'Undervalued' && s.fundamental.pbv < 1);
@@ -129,8 +156,28 @@ export function ScreenerPage() {
       result = result.filter(s => s.technical.ema20 > s.technical.ema50);
     }
 
+    // Sort
+    result.sort((a, b) => {
+      let comparison = 0;
+      switch (sortConfig.field) {
+        case 'ticker':
+          comparison = a.ticker.localeCompare(b.ticker);
+          break;
+        case 'name':
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case 'price':
+          comparison = a.lastClose - b.lastClose;
+          break;
+        case 'percentChange':
+          comparison = a.percentChange - b.percentChange;
+          break;
+      }
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+
     setFilteredStocks(result);
-  }, [stocks, searchQuery, filters]);
+  }, [stocks, searchQuery, filters, sortConfig]);
 
   const handleSaveNotification = (setting: NotificationSetting) => {
     const newNotifications = { ...notifications, [setting.stockId]: setting };
@@ -206,12 +253,33 @@ export function ScreenerPage() {
 
           {/* Results Area */}
           <div className="flex-1">
-            <div className="mb-6 flex justify-between items-end">
+            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">Screening Results</h2>
                 <p className="text-sm text-slate-500 mt-1">
                   Showing {filteredStocks.length} stocks matching your criteria
                 </p>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-slate-500">Sort by:</span>
+                <select
+                  className="text-sm border border-slate-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  value={`${sortConfig.field}-${sortConfig.direction}`}
+                  onChange={(e) => {
+                    const [field, direction] = e.target.value.split('-');
+                    setSortConfig({ field: field as SortField, direction: direction as SortDirection });
+                  }}
+                >
+                  <option value="ticker-asc">Ticker (A-Z)</option>
+                  <option value="ticker-desc">Ticker (Z-A)</option>
+                  <option value="name-asc">Name (A-Z)</option>
+                  <option value="name-desc">Name (Z-A)</option>
+                  <option value="price-asc">Price (Low to High)</option>
+                  <option value="price-desc">Price (High to Low)</option>
+                  <option value="percentChange-desc">Change (High to Low)</option>
+                  <option value="percentChange-asc">Change (Low to High)</option>
+                </select>
               </div>
             </div>
 
@@ -244,6 +312,7 @@ export function ScreenerPage() {
                     setFilters({
                       recommendation: [],
                       strategy: [],
+                      industry: [],
                       undervalued: false,
                       oversold: false,
                       goldenCross: false

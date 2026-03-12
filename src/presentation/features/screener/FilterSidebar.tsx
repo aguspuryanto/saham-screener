@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button';
 export interface FilterOptions {
   recommendation: string[];
   strategy: string[];
+  industry: string[];
   undervalued: boolean;
   oversold: boolean;
   goldenCross: boolean;
@@ -29,6 +30,26 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
       : [...filters.strategy, strat];
     onChange({ ...filters, strategy: newStrats });
   };
+
+  const toggleIndustry = (ind: string) => {
+    const newInds = filters.industry.includes(ind)
+      ? filters.industry.filter(i => i !== ind)
+      : [...filters.industry, ind];
+    onChange({ ...filters, industry: newInds });
+  };
+
+  const industries = [
+    { id: 'FINANCE', label: 'Finance' },
+    { id: 'CONSUMER GOODS INDUSTRY', label: 'Consumer Goods' },
+    { id: 'TRADE, SERVICES, & INVESTMENT', label: 'Trade & Services' },
+    { id: 'PROPERTY, REAL ESTATE AND BUILDING CONSTRUCTION', label: 'Property & Real Estate' },
+    { id: 'INFRASTRUCTURE, UTILITIES & TRANSPORTATION', label: 'Infrastructure & Transport' },
+    { id: 'BASIC INDUSTRY AND CHEMICALS', label: 'Basic Industry & Chemicals' },
+    { id: 'MINING', label: 'Mining' },
+    { id: 'AGRICULTURE', label: 'Agriculture' },
+    { id: 'MISCELLANEOUS INDUSTRY', label: 'Miscellaneous Industry' },
+    { id: 'Unknown', label: 'Unknown' }
+  ];
 
   return (
     <Card className="w-full lg:w-64 shrink-0 border-slate-200">
@@ -68,6 +89,24 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
                   className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                 />
                 <span className="text-sm text-slate-600">{strat}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Industry */}
+        <div>
+          <h4 className="text-sm font-semibold text-slate-700 mb-3">Industry</h4>
+          <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+            {industries.map(ind => (
+              <label key={ind.id} className="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={filters.industry.includes(ind.id)}
+                  onChange={() => toggleIndustry(ind.id)}
+                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-slate-600">{ind.label}</span>
               </label>
             ))}
           </div>
@@ -113,6 +152,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
           onClick={() => onChange({
             recommendation: [],
             strategy: [],
+            industry: [],
             undervalued: false,
             oversold: false,
             goldenCross: false
