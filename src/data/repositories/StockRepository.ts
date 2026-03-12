@@ -1,4 +1,5 @@
 import { Stock } from '../../domain/models/Stock';
+import axios from 'axios';
 
 export interface StockRepository {
   getStocks(): Promise<Stock[]>;
@@ -8,11 +9,8 @@ export interface StockRepository {
 export class ApiStockRepository implements StockRepository {
   async getStocks(): Promise<Stock[]> {
     try {
-      const response = await fetch('https://pasardana.id/api/StockSearchResult/GetAll?pageBegin=0&pageLength=1000&sortField=Code&sortOrder=ASC');
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
+      const response = await axios.get('/api/stocks');
+      const data = response.data;
       
       return data.map((item: any) => {
         const per = item.Per || 0;
