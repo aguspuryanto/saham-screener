@@ -3,7 +3,8 @@ import { Stock } from '../../../domain/models/Stock';
 import { stockRepository } from '../../../data/repositories/StockRepository';
 import { FilterSidebar, FilterOptions } from './FilterSidebar';
 import { StockCard } from './StockCard';
-import { Search, SlidersHorizontal, RefreshCw } from 'lucide-react';
+import { StockDetailPage } from './StockDetailPage';
+import { Search, SlidersHorizontal, RefreshCw, X, Command } from 'lucide-react';
 import { NotificationModal, NotificationSetting } from './NotificationModal';
 
 type SortField = 'ticker' | 'name' | 'price' | 'percentChange';
@@ -29,11 +30,13 @@ export function ScreenerPage() {
     return saved ? JSON.parse(saved) : {};
   });
   const [selectedStockForNotification, setSelectedStockForNotification] = useState<Stock | null>(null);
+  const [selectedStockForDetail, setSelectedStockForDetail] = useState<Stock | null>(null);
 
   const [filters, setFilters] = useState<FilterOptions>({
     recommendation: [],
     strategy: [],
     industry: [],
+    search: '',
     undervalued: false,
     oversold: false,
     goldenCross: false,
@@ -118,8 +121,8 @@ export function ScreenerPage() {
     let result = stocks;
 
     // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (filters.search) {
+      const query = filters.search.toLowerCase();
       result = result.filter(s => 
         s.ticker.toLowerCase().includes(query) || 
         s.name.toLowerCase().includes(query)
@@ -177,7 +180,7 @@ export function ScreenerPage() {
     });
 
     setFilteredStocks(result);
-  }, [stocks, searchQuery, filters, sortConfig]);
+  }, [stocks, filters, sortConfig]);
 
   const handleSaveNotification = (setting: NotificationSetting) => {
     const newNotifications = { ...notifications, [setting.stockId]: setting };
@@ -185,6 +188,11 @@ export function ScreenerPage() {
     localStorage.setItem('stock_notifications', JSON.stringify(newNotifications));
     setSelectedStockForNotification(null);
   };
+
+  const handleStockClick = useCallback((stock: Stock) => {
+    console.log('Stock clicked:', stock.ticker);
+    setSelectedStockForDetail(stock);
+  }, []);
 
   const handleRemoveNotification = (stockId: string) => {
     const newNotifications = { ...notifications };
@@ -212,11 +220,20 @@ export function ScreenerPage() {
             </div>
             <input
               type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm transition-colors"
+              className="block w-full pl-10 pr-10 py-2 border border-slate-200 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm transition-colors"
               placeholder="Search ticker or company name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 focus:outline-none"
+                title="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
@@ -254,17 +271,24 @@ export function ScreenerPage() {
           {/* Results Area */}
           <div className="flex-1">
             <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-              <div>
+              <div className="w-full sm:w-8/12">
                 <h2 className="text-2xl font-bold text-slate-900">Screening Results</h2>
                 <p className="text-sm text-slate-500 mt-1">
                   Showing {filteredStocks.length} stocks matching your criteria
                 </p>
+                <input
+                  type="text"
+                  placeholder="Search stocks..."
+                  className="mt-2 text-sm border border-slate-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-white w-full"
+                  value={filters.search}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                />
               </div>
               
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-slate-500">Sort by:</span>
+              <div className="flex items-center space-x-2 w-full sm:w-4/12 justify-end">
+                <span className="text-sm text-slate-500 whitespace-nowrap">Sort by:</span>
                 <select
-                  className="text-sm border border-slate-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className="text-sm border border-slate-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-white flex-1 min-w-fit"
                   value={`${sortConfig.field}-${sortConfig.direction}`}
                   onChange={(e) => {
                     const [field, direction] = e.target.value.split('-');
@@ -283,6 +307,60 @@ export function ScreenerPage() {
               </div>
             </div>
 
+            {/* Filter Industry, with badge */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Filter by Industry</h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'FINANCE', label: 'Finance' },
+                  { id: 'CONSUMER GOODS INDUSTRY', label: 'Consumer Goods' },
+                  { id: 'TRADE, SERVICES, & INVESTMENT', label: 'Trade & Services' },
+                  { id: 'PROPERTY, REAL ESTATE AND BUILDING CONSTRUCTION', label: 'Property & Real Estate' },
+                  { id: 'INFRASTRUCTURE, UTILITIES & TRANSPORTATION', label: 'Infrastructure & Transport' },
+                  { id: 'BASIC INDUSTRY AND CHEMICALS', label: 'Basic Industry & Chemicals' },
+                  { id: 'MINING', label: 'Mining' },
+                  { id: 'AGRICULTURE', label: 'Agriculture' },
+                  { id: 'MISCELLANEOUS INDUSTRY', label: 'Miscellaneous Industry' },
+                  { id: 'Unknown', label: 'Unknown' }
+                ].map(industry => {
+                  const count = stocks.filter(stock => stock.sector === industry.id).length;
+                  const isSelected = filters.industry.includes(industry.id);
+                  
+                  return (
+                    <button
+                      key={industry.id}
+                      onClick={() => {
+                        const newIndustries = isSelected
+                          ? filters.industry.filter(id => id !== industry.id)
+                          : [...filters.industry, industry.id];
+                        setFilters({ ...filters, industry: newIndustries });
+                      }}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        isSelected
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                      } border`}
+                    >
+                      {industry.label}
+                      <span className={`inline-flex items-center justify-center w-5 h-5 text-xs rounded-full ${
+                        isSelected ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {filters.industry.length > 0 && (
+                <button
+                  onClick={() => setFilters({ ...filters, industry: [] })}
+                  className="mt-3 text-xs text-slate-500 hover:text-slate-700 underline"
+                >
+                  Clear industry filters
+                </button>
+              )}
+            </div>
+
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
@@ -293,7 +371,7 @@ export function ScreenerPage() {
                   <StockCard 
                     key={stock.id} 
                     stock={stock} 
-                    onClick={(s) => console.log('Clicked', s.ticker)}
+                    onClick={handleStockClick}
                     onSetNotification={setSelectedStockForNotification}
                     hasNotification={!!notifications[stock.id]}
                   />
@@ -313,6 +391,7 @@ export function ScreenerPage() {
                       recommendation: [],
                       strategy: [],
                       industry: [],
+                      search: '',
                       undervalued: false,
                       oversold: false,
                       goldenCross: false
@@ -335,6 +414,15 @@ export function ScreenerPage() {
           onSave={handleSaveNotification}
           onCancel={() => setSelectedStockForNotification(null)}
           onRemove={handleRemoveNotification}
+        />
+      )}
+
+      {selectedStockForDetail && (
+        <StockDetailPage
+          stock={selectedStockForDetail}
+          onBack={() => setSelectedStockForDetail(null)}
+          onSetNotification={setSelectedStockForNotification}
+          hasNotification={!!notifications[selectedStockForDetail.id]}
         />
       )}
     </div>
