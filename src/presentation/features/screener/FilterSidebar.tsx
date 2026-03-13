@@ -6,6 +6,7 @@ export interface FilterOptions {
   recommendation: string[];
   strategy: string[];
   industry: string[];
+  search: string;
   undervalued: boolean;
   oversold: boolean;
   goldenCross: boolean;
@@ -153,6 +154,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
             recommendation: [],
             strategy: [],
             industry: [],
+            search: '',
             undervalued: false,
             oversold: false,
             goldenCross: false
