@@ -222,12 +222,12 @@ export function ScreenerPage() {
               type="text"
               className="block w-full pl-10 pr-10 py-2 border border-slate-200 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm transition-colors"
               placeholder="Search ticker or company name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
-            {searchQuery && (
+            {filters.search && (
               <button
-                onClick={() => setSearchQuery('')}
+                onClick={() => setFilters({ ...filters, search: '' })}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 focus:outline-none"
                 title="Clear search"
               >
@@ -276,13 +276,13 @@ export function ScreenerPage() {
                 <p className="text-sm text-slate-500 mt-1">
                   Showing {filteredStocks.length} stocks matching your criteria
                 </p>
-                <input
+                {/* <input
                   type="text"
                   placeholder="Search stocks..."
                   className="mt-2 text-sm border border-slate-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-white w-full"
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                />
+                /> */}
               </div>
               
               <div className="flex items-center space-x-2 w-full sm:w-4/12 justify-end">

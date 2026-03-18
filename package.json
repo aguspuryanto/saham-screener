@@ -2,14 +2,19 @@
   "name": "react-example",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
+  "main": "main.cjs",
+  "homepage": "./",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
     "start": "node server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "electron": "electron .",
+    "electron:build": "npx electron-builder",
+    "electron:dev": "npx tsx server.ts & npm run build && npm run electron"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -32,9 +37,39 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
+    "electron": "^41.0.2",
+    "electron-builder": "^26.8.1",
+    "electron-rebuild": "^3.2.9",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
+  },
+  "build": {
+    "appId": "com.example.saham-screener",
+    "productName": "Saham Screener",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "main.cjs",
+      "preload.js"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "pnpm": {
+    "packageExtensions": {
+      "better-sqlite3": {
+        "dependencies": {
+          "node-gyp": "10"
+        }
+      }
+    }
   }
 }

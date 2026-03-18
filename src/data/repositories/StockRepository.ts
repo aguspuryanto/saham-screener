@@ -9,7 +9,7 @@ export interface StockRepository {
 export class ApiStockRepository implements StockRepository {
   async getStocks(): Promise<Stock[]> {
     try {
-      const response = await axios.get('/api/stocks');
+      const response = await axios.get('http://localhost:3001/api/stocks');
       const data = response.data;
       
       return data.map((item: any) => {
