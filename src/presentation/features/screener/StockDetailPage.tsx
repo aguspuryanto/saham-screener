@@ -254,7 +254,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
         {/* Price and Quick Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2">
-            <Card className="border-slate-200">
+            <Card className="border-slate-200 mb-6">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-6">
                   <div>
@@ -312,11 +312,107 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
                 </div>
               </CardContent>
             </Card>
+
+            {/* Checklist Entry */}
+            <Card className="border-blue-200 bg-blue-50 mb-6">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-blue-900 flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  Checklist Sebelum Entry
+                </h3>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      defaultChecked={stock.technical.volRatio > 1.5}
+                    />
+                    <label className="text-sm text-blue-900 font-medium">
+                      Volume &gt; 1.5x
+                      <span className="text-xs text-blue-700 ml-2">
+                        (Current: {stock.technical.volRatio.toFixed(2)}x)
+                      </span>
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      defaultChecked={stock.percentChange >= 3 && stock.percentChange <= 8}
+                    />
+                    <label className="text-sm text-blue-900 font-medium">
+                      Naik 3–8%
+                      <span className="text-xs text-blue-700 ml-2">
+                        (Current: {stock.percentChange.toFixed(2)}%)
+                      </span>
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      defaultChecked={stock.technical.rsi14 >= 55 && stock.technical.rsi14 <= 70}
+                    />
+                    <label className="text-sm text-blue-900 font-medium">
+                      RSI 55–70
+                      <span className="text-xs text-blue-700 ml-2">
+                        (Current: {stock.technical.rsi14})
+                      </span>
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      defaultChecked={stock.lastClose > stock.technical.ema20}
+                    />
+                    <label className="text-sm text-blue-900 font-medium">
+                      Break Resistance
+                      <span className="text-xs text-blue-700 ml-2">
+                        (Above EMA20: {stock.technical.ema20.toLocaleString('id-ID')})
+                      </span>
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <label className="text-sm text-blue-900 font-medium">
+                      Jam 09:15 – 10:30
+                      <span className="text-xs text-blue-700 ml-2">
+                        (Trading Window)
+                      </span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-blue-900">Entry Signal:</span>
+                    <Badge variant="success" className="text-xs font-bold">
+                      ENTRY
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-blue-800 mt-1">
+                    Checklist terpenuhi? Siap untuk entry dengan risk management yang tepat
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            
           </div>
 
           {/* Broker Consensus Card */}
           <div>
-            <Card className="border-slate-200">
+            <Card className="border-slate-200 mb-6">
               <CardHeader className="pb-3">
                 <h3 className="text-lg font-semibold text-slate-900 flex items-center">
                   <Star className="w-5 h-5 mr-2" />
@@ -403,7 +499,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Technical Overview */}
-              <Card className="border-slate-200">
+              <Card className="border-slate-200 mb-6">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-slate-900 flex items-center">
                     <BarChart2 className="w-5 h-5 mr-2" />
