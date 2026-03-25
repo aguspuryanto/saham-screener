@@ -102,41 +102,41 @@ export function StockCard({ stock, onClick, onSetNotification, hasNotification, 
           </div>
         </div>
         
-        <div className="flex justify-between items-end mb-3">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-slate-900 mb-1">{stock.ticker}</h3>
-            <p className="text-sm text-slate-500 truncate max-w-[180px]">{stock.name}</p>
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold text-slate-900 mb-1 truncate">{stock.ticker}</h3>
+            <p className="text-sm text-slate-500 truncate">{stock.name}</p>
             <div className="flex items-center mt-2">
-              <Badge variant="neutral" className="bg-slate-100 text-slate-600 border-slate-200 text-xs">
+              <Badge variant="neutral" className="bg-slate-100 text-slate-600 border-slate-200 text-xs truncate max-w-[150px]">
                 {stock.sector}
               </Badge>
             </div>
           </div>
-          <div className="text-right ml-3">
-            <div className="text-lg font-bold text-slate-900">
+          <div className="text-right ml-3 flex-shrink-0">
+            <div className="text-lg font-bold text-slate-900 whitespace-nowrap">
               Rp {stock.lastClose.toLocaleString('id-ID')}
             </div>
-            <div className={cn("flex items-center justify-end text-sm font-medium", isPositive ? "text-emerald-600" : "text-red-600")}>
+            <div className={cn("flex items-center justify-end text-sm font-medium whitespace-nowrap", isPositive ? "text-emerald-600" : "text-red-600")}>
               {isPositive ? <ArrowUpRight className="w-4 h-4 mr-0.5" /> : <ArrowDownRight className="w-4 h-4 mr-0.5" />}
               {Math.abs(stock.percentChange).toFixed(2)}%
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2">
-            <Badge variant="neutral" className="bg-slate-100 text-slate-600 border-slate-200">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs mt-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="neutral" className="bg-slate-100 text-slate-600 border-slate-200 text-xs">
               {getStrategyIcon(stock.strategy)}
-              {stock.strategy}
+              <span className="truncate max-w-[80px]">{stock.strategy}</span>
             </Badge>
             <Badge variant={getDcfColor(stock.dcf.status)} className="text-xs">
               <Target className="w-3 h-3 mr-1" />
-              {stock.dcf.status}
+              <span className="truncate max-w-[60px]">{stock.dcf.status}</span>
             </Badge>
           </div>
-          <div className="flex items-center text-slate-500">
+          <div className="flex items-center text-slate-500 flex-shrink-0">
             <Users className="w-3 h-3 mr-1" />
-            <span className="text-xs">{stock.consensus.analystsCount} analysts</span>
+            <span className="text-xs whitespace-nowrap">{stock.consensus.analystsCount} analysts</span>
           </div>
         </div>
       </CardHeader>
