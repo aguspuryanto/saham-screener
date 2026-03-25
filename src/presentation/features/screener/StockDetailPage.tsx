@@ -559,7 +559,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
               </Card>
 
               {/* Fundamental Overview */}
-              <Card className="border-slate-200">
+              <Card className="border-slate-200 mb-6">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-slate-900 flex items-center">
                     <Calculator className="w-5 h-5 mr-2" />
@@ -979,7 +979,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
           {activeTab === 'trading' && (
             <div className="space-y-6">
               {/* Trading Overview */}
-              <Card className="border-slate-200">
+              <Card className="border-slate-200 mb-6">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-slate-900 flex items-center">
                     <Zap className="w-5 h-5 mr-2" />
@@ -1038,7 +1038,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
               </Card>
 
               {/* Scalping Strategy */}
-              <Card className="border-slate-200">
+              <Card className="border-slate-200 mb-6">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-slate-900 flex items-center">
                     <Zap className="w-5 h-5 mr-2" />
@@ -1141,7 +1141,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
               </Card>
 
               {/* Swing Trading Strategy */}
-              <Card className="border-slate-200">
+              <Card className="border-slate-200 mb-6">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-slate-900 flex items-center">
                     <TrendingUp className="w-5 h-5 mr-2" />
@@ -1246,7 +1246,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
               </Card>
 
               {/* Final Recommendation */}
-              <Card className="border-emerald-200 bg-emerald-50">
+              <Card className="border-emerald-200 bg-emerald-50 mb-6">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-emerald-900 flex items-center">
                     <Target className="w-5 h-5 mr-2" />
