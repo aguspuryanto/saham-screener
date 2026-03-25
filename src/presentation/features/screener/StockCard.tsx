@@ -123,7 +123,7 @@ export function StockCard({ stock, onClick, onSetNotification, hasNotification, 
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs mt-3">
+        {/* <div className="flex flex-wrap items-center justify-between gap-2 text-xs mt-3">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="neutral" className="bg-slate-100 text-slate-600 border-slate-200 text-xs">
               {getStrategyIcon(stock.strategy)}
@@ -138,7 +138,7 @@ export function StockCard({ stock, onClick, onSetNotification, hasNotification, 
             <Users className="w-3 h-3 mr-1" />
             <span className="text-xs whitespace-nowrap">{stock.consensus.analystsCount} analysts</span>
           </div>
-        </div>
+        </div> */}
       </CardHeader>
       
       <CardContent className="px-5 pb-5">
