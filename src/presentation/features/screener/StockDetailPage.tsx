@@ -23,7 +23,14 @@ import {
   Info,
   TrendingUp as TrendingIcon,
   PieChart,
-  Calculator
+  Calculator,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Zap,
+  Shield,
+  TrendingDown as BearishIcon,
+  ArrowUpRight as BullishIcon
 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 
@@ -36,9 +43,129 @@ interface StockDetailPageProps {
 
 export function StockDetailPage({ stock, onBack, onSetNotification, hasNotification }: StockDetailPageProps) {
   console.log('StockDetailPage rendered for:', stock.ticker);
-  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'valuation'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading'>('trading');
   
   const isPositive = stock.percentChange >= 0;
+
+  // Analisa Trading Komprehensif
+  const getTradingAnalysis = (stock: Stock) => {
+    const rsi = stock.technical.rsi14;
+    const macd = stock.technical.macd;
+    const macdSignal = stock.technical.macdSignal;
+    const volRatio = stock.technical.volRatio;
+    const pbv = stock.fundamental.pbv;
+    const per = stock.fundamental.per;
+    const eps = stock.fundamental.eps;
+    const roe = stock.fundamental.roe;
+    
+    // Kondisi Umum
+    const trend = stock.percentChange >= -2 ? 'sideways' : stock.percentChange >= -5 ? 'weak downtrend' : 'strong downtrend';
+    const volatility = volRatio >= 2 ? 'high' : volRatio >= 1.5 ? 'medium' : 'low';
+    
+    // Analisa Teknikal
+    const rsiStatus = rsi >= 70 ? 'overbought' : rsi <= 30 ? 'oversold' : rsi <= 40 ? 'near oversold' : rsi >= 60 ? 'near overbought' : 'neutral';
+    const macdSignalStatus = macd > macdSignal ? 'bullish' : 'bearish';
+    const emaCross = stock.technical.ema20 > stock.technical.ema50 ? 'golden cross' : 'death cross';
+    
+    // Analisa Fundamental
+    const fundamentalHealth = eps > 0 && roe > 0 && per > 0 && per < 20 ? 'healthy' : eps > 0 ? 'weak' : 'poor';
+    const valuation = pbv < 1 ? 'undervalued' : pbv < 2 ? 'fair' : pbv < 3 ? 'expensive' : 'very expensive';
+    
+    // Analisa Bandar/Market Maker
+    let bandarActivity = 'unknown';
+    if (volRatio >= 2 && volatility === 'high') {
+      bandarActivity = stock.percentChange < -5 ? 'distribution' : 'accumulation';
+    } else if (volRatio >= 1.5) {
+      bandarActivity = 'moderate activity';
+    } else {
+      bandarActivity = 'low activity';
+    }
+    
+    // Strategi Trading Recommendations
+    const scalpingRecommendation = {
+      suitable: volatility === 'high' || volatility === 'medium',
+      confidence: volatility === 'high' ? 85 : volatility === 'medium' ? 70 : 40,
+      entryRange: {
+        min: stock.lastClose * 0.98,
+        max: stock.lastClose * 1.02
+      },
+      targetRange: {
+        min: stock.lastClose * 1.03,
+        max: stock.lastClose * 1.07
+      },
+      stopLoss: stock.lastClose * 0.95
+    };
+    
+    const swingRecommendation = {
+      suitable: trend === 'sideways' || (trend === 'weak downtrend' && rsiStatus === 'near oversold'),
+      confidence: trend === 'sideways' ? 75 : trend === 'weak downtrend' ? 60 : 30,
+      entryCondition: stock.lastClose > stock.technical.ema20,
+      target: stock.lastClose * 1.15,
+      stopLoss: stock.lastClose * 0.92
+    };
+    
+    // Risk Level
+    const riskLevel = fundamentalHealth === 'poor' && volatility === 'high' ? 'very high' :
+                     fundamentalHealth === 'poor' ? 'high' :
+                     volatility === 'high' ? 'medium-high' :
+                     fundamentalHealth === 'weak' ? 'medium' : 'low';
+    
+    return {
+      trend,
+      volatility,
+      rsiStatus,
+      macdSignal: macdSignalStatus,
+      emaCross,
+      fundamentalHealth,
+      valuation,
+      bandarActivity,
+      scalpingRecommendation,
+      swingRecommendation,
+      riskLevel,
+      marketCap: pbv > 0 ? 'small cap' : 'unknown', // Simplified
+      liquidity: volRatio >= 2 ? 'high' : volRatio >= 1.5 ? 'medium' : 'low'
+    };
+  };
+
+  const analysis = getTradingAnalysis(stock);
+
+  // Helper functions untuk UI
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case 'very high': return 'danger';
+      case 'high': return 'danger';
+      case 'medium-high': return 'warning';
+      case 'medium': return 'warning';
+      default: return 'success';
+    }
+  };
+
+  const getSignalColor = (signal: string) => {
+    switch (signal) {
+      case 'bullish': case 'golden cross': case 'overbought': return 'success';
+      case 'bearish': case 'death cross': case 'oversold': return 'danger';
+      default: return 'neutral';
+    }
+  };
+
+  const getHealthColor = (health: string) => {
+    switch (health) {
+      case 'healthy': return 'success';
+      case 'weak': return 'warning';
+      case 'poor': return 'danger';
+      default: return 'neutral';
+    }
+  };
+
+  const formatCurrency = (value: number) => `Rp ${value.toLocaleString('id-ID')}`;
+  const formatPercent = (value: number) => `${(value * 100).toFixed(2)}%`;
+
+  const tabs = [
+    { id: 'trading', label: 'Trading Analysis', icon: <Zap className="w-4 h-4" /> },
+    { id: 'overview', label: 'Overview', icon: <Info className="w-4 h-4" /> },
+    { id: 'technical', label: 'Technical', icon: <BarChart2 className="w-4 h-4" /> },
+    { id: 'fundamental', label: 'Fundamental', icon: <Calculator className="w-4 h-4" /> },
+  ];
 
   const getRecColor = (rec: string) => {
     switch (rec) {
@@ -85,13 +212,6 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
       default: return null;
     }
   };
-
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: <Info className="w-4 h-4" /> },
-    { id: 'technical', label: 'Technical', icon: <BarChart2 className="w-4 h-4" /> },
-    { id: 'fundamental', label: 'Fundamental', icon: <Calculator className="w-4 h-4" /> },
-    { id: 'valuation', label: 'Valuation', icon: <PieChart className="w-4 h-4" /> },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-50 fixed inset-0 z-50 overflow-auto">
@@ -758,6 +878,329 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {activeTab === 'trading' && (
+            <div className="space-y-6">
+              {/* Trading Overview */}
+              <Card className="border-slate-200">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-slate-900 flex items-center">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Trading Analysis Overview
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="text-xs text-slate-500 mb-1">Trend Status</div>
+                      <Badge variant={analysis.trend.includes('downtrend') ? 'danger' : analysis.trend === 'sideways' ? 'warning' : 'success'} className="text-sm">
+                        {analysis.trend === 'strong downtrend' ? <BearishIcon className="w-3 h-3 mr-1" /> : 
+                         analysis.trend === 'sideways' ? <Activity className="w-3 h-3 mr-1" /> :
+                         <BullishIcon className="w-3 h-3 mr-1" />}
+                        {analysis.trend}
+                      </Badge>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="text-xs text-slate-500 mb-1">Volatility</div>
+                      <Badge variant={analysis.volatility === 'high' ? 'danger' : analysis.volatility === 'medium' ? 'warning' : 'success'} className="text-sm">
+                        {analysis.volatility}
+                      </Badge>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="text-xs text-slate-500 mb-1">Risk Level</div>
+                      <Badge variant={getRiskColor(analysis.riskLevel)} className="text-sm">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        {analysis.riskLevel}
+                      </Badge>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="text-xs text-slate-500 mb-1">Liquidity</div>
+                      <Badge variant={analysis.liquidity === 'high' ? 'success' : analysis.liquidity === 'medium' ? 'warning' : 'danger'} className="text-sm">
+                        {analysis.liquidity}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Market Maker Activity */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-center mb-2">
+                      <Activity className="w-5 h-5 text-amber-600 mr-2" />
+                      <h4 className="font-semibold text-amber-900">Bandar Activity Analysis</h4>
+                    </div>
+                    <div className="text-sm text-amber-800">
+                      <p className="mb-2">Current Activity: <span className="font-semibold">{analysis.bandarActivity}</span></p>
+                      {analysis.bandarActivity === 'distribution' && (
+                        <p className="text-xs text-amber-700">⚠️ High volume with price decline suggests distribution (selling pressure)</p>
+                      )}
+                      {analysis.bandarActivity === 'accumulation' && (
+                        <p className="text-xs text-green-700">✅ High volume with price stability suggests accumulation (buying interest)</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Scalping Strategy */}
+              <Card className="border-slate-200">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-slate-900 flex items-center">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Scalping Strategy (Intraday)
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-slate-900">Suitability</h4>
+                        <Badge variant={analysis.scalpingRecommendation.suitable ? 'success' : 'danger'} className="text-sm">
+                          {analysis.scalpingRecommendation.suitable ? <CheckCircle className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />}
+                          {analysis.scalpingRecommendation.suitable ? 'Suitable' : 'Not Suitable'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                          <div className="text-xs text-slate-500 mb-1">Confidence Level</div>
+                          <div className="flex items-center">
+                            <div className="flex-1 bg-slate-200 rounded-full h-2 mr-3">
+                              <div 
+                                className="bg-emerald-600 h-2 rounded-full" 
+                                style={{ width: `${analysis.scalpingRecommendation.confidence}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-semibold">{analysis.scalpingRecommendation.confidence}%</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <h5 className="text-sm font-medium text-blue-900 mb-2">Entry Range</h5>
+                          <div className="text-sm text-blue-800">
+                            {formatCurrency(analysis.scalpingRecommendation.entryRange.min)} - {formatCurrency(analysis.scalpingRecommendation.entryRange.max)}
+                          </div>
+                        </div>
+
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                          <h5 className="text-sm font-medium text-green-900 mb-2">Target Range</h5>
+                          <div className="text-sm text-green-800">
+                            {formatCurrency(analysis.scalpingRecommendation.targetRange.min)} - {formatCurrency(analysis.scalpingRecommendation.targetRange.max)}
+                          </div>
+                          <div className="text-xs text-green-700 mt-1">
+                            Target: {formatPercent((analysis.scalpingRecommendation.targetRange.min / stock.lastClose) - 1)} - {formatPercent((analysis.scalpingRecommendation.targetRange.max / stock.lastClose) - 1)}
+                          </div>
+                        </div>
+
+                        <div className="bg-red-50 rounded-lg p-3 border border-red-100">
+                          <h5 className="text-sm font-medium text-red-900 mb-2">Stop Loss</h5>
+                          <div className="text-sm text-red-800">
+                            {formatCurrency(analysis.scalpingRecommendation.stopLoss)}
+                          </div>
+                          <div className="text-xs text-red-700 mt-1">
+                            Risk: {formatPercent((analysis.scalpingRecommendation.stopLoss / stock.lastClose) - 1)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-4">Trading Rules</h4>
+                      <div className="space-y-3">
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                          <h5 className="text-sm font-medium text-slate-900 mb-2">Entry Triggers</h5>
+                          <ul className="text-xs text-slate-600 space-y-1">
+                            <li>• Volume surge &gt; 2x average</li>
+                            <li>• Price within entry range</li>
+                            <li>• Reversal candle pattern (hammer/engulfing)</li>
+                            <li>• RSI not in extreme zones</li>
+                          </ul>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                          <h5 className="text-sm font-medium text-slate-900 mb-2">Exit Conditions</h5>
+                          <ul className="text-xs text-slate-600 space-y-1">
+                            <li>• Target price reached</li>
+                            <li>• Reversal signal detected</li>
+                            <li>• Volume drops significantly</li>
+                            <li>• Stop loss triggered</li>
+                          </ul>
+                        </div>
+
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <h5 className="text-sm font-medium text-yellow-900 mb-2 flex items-center">
+                            <AlertTriangle className="w-4 h-4 mr-1" />
+                            Scalping Warnings
+                          </h5>
+                          <ul className="text-xs text-yellow-800 space-y-1">
+                            <li>• High frequency trading required</li>
+                            <li>• Strict discipline essential</li>
+                            <li>• Transaction costs impact profits</li>
+                            <li>• Not suitable for beginners</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Swing Trading Strategy */}
+              <Card className="border-slate-200">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-slate-900 flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2" />
+                    Swing Trading Strategy (2-5 days)
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-slate-900">Suitability</h4>
+                        <Badge variant={analysis.swingRecommendation.suitable ? 'success' : 'warning'} className="text-sm">
+                          {analysis.swingRecommendation.suitable ? <CheckCircle className="w-3 h-3 mr-1" /> : <AlertTriangle className="w-3 h-3 mr-1" />}
+                          {analysis.swingRecommendation.suitable ? 'Suitable' : 'Wait for Better Setup'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                          <div className="text-xs text-slate-500 mb-1">Confidence Level</div>
+                          <div className="flex items-center">
+                            <div className="flex-1 bg-slate-200 rounded-full h-2 mr-3">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full" 
+                                style={{ width: `${analysis.swingRecommendation.confidence}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-semibold">{analysis.swingRecommendation.confidence}%</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <h5 className="text-sm font-medium text-blue-900 mb-2">Target Price</h5>
+                          <div className="text-sm text-blue-800">
+                            {formatCurrency(analysis.swingRecommendation.target)}
+                          </div>
+                          <div className="text-xs text-blue-700 mt-1">
+                            Potential: {formatPercent((analysis.swingRecommendation.target / stock.lastClose) - 1)}
+                          </div>
+                        </div>
+
+                        <div className="bg-red-50 rounded-lg p-3 border border-red-100">
+                          <h5 className="text-sm font-medium text-red-900 mb-2">Stop Loss</h5>
+                          <div className="text-sm text-red-800">
+                            {formatCurrency(analysis.swingRecommendation.stopLoss)}
+                          </div>
+                          <div className="text-xs text-red-700 mt-1">
+                            Risk: {formatPercent((analysis.swingRecommendation.stopLoss / stock.lastClose) - 1)}
+                          </div>
+                        </div>
+
+                        <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                          <h5 className="text-sm font-medium text-purple-900 mb-2">Entry Condition</h5>
+                          <div className="text-sm text-purple-800">
+                            Price {analysis.swingRecommendation.entryCondition ? 'Above' : 'Below'} EMA20
+                          </div>
+                          <div className="text-xs text-purple-700 mt-1">
+                            Current: {formatCurrency(stock.lastClose)} | EMA20: {formatCurrency(stock.technical.ema20)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-4">Market Context</h4>
+                      <div className="space-y-3">
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                          <h5 className="text-sm font-medium text-slate-900 mb-2">Technical Setup</h5>
+                          <div className="text-xs text-slate-600 space-y-1">
+                            <div>RSI Status: <Badge variant={getSignalColor(analysis.rsiStatus)} className="text-xs">{analysis.rsiStatus}</Badge></div>
+                            <div>MACD Signal: <Badge variant={getSignalColor(analysis.macdSignal)} className="text-xs">{analysis.macdSignal}</Badge></div>
+                            <div>EMA Cross: <Badge variant={getSignalColor(analysis.emaCross)} className="text-xs">{analysis.emaCross}</Badge></div>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                          <h5 className="text-sm font-medium text-slate-900 mb-2">Best Scenarios</h5>
+                          <ul className="text-xs text-slate-600 space-y-1">
+                            <li>• Sideways market with clear support/resistance</li>
+                            <li>• Weak downtrend with oversold conditions</li>
+                            <li>• Breakout from consolidation pattern</li>
+                            <li>• Positive fundamental catalysts</li>
+                          </ul>
+                        </div>
+
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                          <h5 className="text-sm font-medium text-orange-900 mb-2 flex items-center">
+                            <Shield className="w-4 h-4 mr-1" />
+                            Risk Management
+                          </h5>
+                          <ul className="text-xs text-orange-800 space-y-1">
+                            <li>• Position size: 1-2% max per trade</li>
+                            <li>• Wait for confirmation signals</li>
+                            <li>• Trail stop when profitable</li>
+                            <li>• Avoid trading against strong trend</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Final Recommendation */}
+              <Card className="border-emerald-200 bg-emerald-50">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-emerald-900 flex items-center">
+                    <Target className="w-5 h-5 mr-2" />
+                    Final Trading Recommendation
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-emerald-900 mb-2">
+                        {analysis.scalpingRecommendation.suitable ? '✅' : '❌'}
+                      </div>
+                      <div className="font-semibold text-emerald-900">Scalping</div>
+                      <div className="text-sm text-emerald-700">
+                        {analysis.scalpingRecommendation.suitable ? 'Recommended' : 'Not Recommended'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-emerald-900 mb-2">
+                        {analysis.swingRecommendation.suitable ? '✅' : '⚠️'}
+                      </div>
+                      <div className="font-semibold text-emerald-900">Swing Trading</div>
+                      <div className="text-sm text-emerald-700">
+                        {analysis.swingRecommendation.suitable ? 'Recommended' : 'Wait for Setup'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-emerald-900 mb-2">
+                        {analysis.fundamentalHealth === 'healthy' ? '⚠️' : '❌'}
+                      </div>
+                      <div className="font-semibold text-emerald-900">Investment</div>
+                      <div className="text-sm text-emerald-700">
+                        {analysis.fundamentalHealth === 'healthy' ? 'For Trading Only' : 'Not Recommended'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-emerald-200">
+                    <h4 className="font-semibold text-emerald-900 mb-2">Key Takeaways</h4>
+                    <ul className="text-sm text-emerald-800 space-y-1">
+                      <li>• This stock is classified as <span className="font-semibold">{analysis.riskLevel}</span> risk</li>
+                      <li>• Best suited for <span className="font-semibold">{analysis.volatility === 'high' ? 'short-term trading' : 'swing trading'}</span></li>
+                      <li>• Current market maker activity: <span className="font-semibold">{analysis.bandarActivity}</span></li>
+                      <li>• Fundamental health: <Badge variant={getHealthColor(analysis.fundamentalHealth)} className="text-xs">{analysis.fundamentalHealth}</Badge></li>
+                      <li>• Always use stop loss and maintain strict discipline</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>
