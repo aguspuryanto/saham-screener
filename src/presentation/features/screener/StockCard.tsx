@@ -11,9 +11,11 @@ interface StockCardProps {
   onClick?: (stock: Stock) => void;
   onSetNotification?: (stock: Stock) => void;
   hasNotification?: boolean;
+  onToggleFavorite?: (stock: Stock) => void;
+  isFavorite?: boolean;
 }
 
-export function StockCard({ stock, onClick, onSetNotification, hasNotification }: StockCardProps) {
+export function StockCard({ stock, onClick, onSetNotification, hasNotification, onToggleFavorite, isFavorite }: StockCardProps) {
   const isPositive = stock.percentChange >= 0;
 
   const getRecColor = (rec: string) => {
@@ -74,6 +76,16 @@ export function StockCard({ stock, onClick, onSetNotification, hasNotification }
             {stock.lastUpdated}
           </div>
           <div className="flex items-center space-x-2">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite?.(stock);
+              }}
+              className={cn("p-1.5 rounded-full transition-colors", isFavorite ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400 hover:text-slate-600")}
+              title={isFavorite ? "Hapus dari Watchlist" : "Tambah ke Watchlist"}
+            >
+              <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-emerald-600' : ''}`} />
+            </button>
             <button 
               onClick={(e) => {
                 e.stopPropagation();

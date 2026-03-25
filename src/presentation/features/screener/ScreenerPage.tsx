@@ -4,6 +4,8 @@ import { stockRepository } from '../../../data/repositories/StockRepository';
 import { FilterSidebar, FilterOptions } from './FilterSidebar';
 import { StockCard } from './StockCard';
 import { StockDetailPage } from './StockDetailPage';
+import { WatchlistSidebar } from './WatchlistSidebar';
+import { WatchlistTicker } from './WatchlistTicker';
 import { Search, SlidersHorizontal, RefreshCw, X, Command } from 'lucide-react';
 import { NotificationModal, NotificationSetting } from './NotificationModal';
 
@@ -28,6 +30,10 @@ export function ScreenerPage() {
   const [notifications, setNotifications] = useState<Record<string, NotificationSetting>>(() => {
     const saved = localStorage.getItem('stock_notifications');
     return saved ? JSON.parse(saved) : {};
+  });
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('stock_favorites');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
   });
   const [selectedStockForNotification, setSelectedStockForNotification] = useState<Stock | null>(null);
   const [selectedStockForDetail, setSelectedStockForDetail] = useState<Stock | null>(null);
@@ -202,6 +208,21 @@ export function ScreenerPage() {
     setSelectedStockForNotification(null);
   };
 
+  const handleToggleFavorite = (stock: Stock) => {
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(stock.id)) {
+      newFavorites.delete(stock.id);
+    } else {
+      newFavorites.add(stock.id);
+    }
+    setFavorites(newFavorites);
+    localStorage.setItem('stock_favorites', JSON.stringify(Array.from(newFavorites)));
+  };
+
+  const getFavoriteStocks = () => {
+    return stocks.filter(stock => favorites.has(stock.id));
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Header */}
@@ -259,6 +280,9 @@ export function ScreenerPage() {
         </div>
       </header>
 
+      {/* Tampilan watchlist, seperti ticker yg berjalan */}
+      <WatchlistTicker favorites={getFavoriteStocks()} />
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -266,6 +290,19 @@ export function ScreenerPage() {
           {/* Sidebar Filters */}
           <div className={`lg:block ${showMobileFilters ? 'block' : 'hidden'}`}>
             <FilterSidebar filters={filters} onChange={setFilters} />
+
+            {/* Daftar Pantau */}
+            <div className="mt-6">
+              <WatchlistSidebar
+                favorites={getFavoriteStocks()}
+                onRemoveFavorite={(stockId) => {
+                  const stock = stocks.find(s => s.id === stockId);
+                  if (stock) handleToggleFavorite(stock);
+                }}
+                onStockClick={handleStockClick}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            </div>
           </div>
 
           {/* Results Area */}
@@ -374,6 +411,8 @@ export function ScreenerPage() {
                     onClick={handleStockClick}
                     onSetNotification={setSelectedStockForNotification}
                     hasNotification={!!notifications[stock.id]}
+                    onToggleFavorite={handleToggleFavorite}
+                    isFavorite={favorites.has(stock.id)}
                   />
                 ))}
               </div>
