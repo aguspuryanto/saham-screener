@@ -78,10 +78,7 @@ export function WatchlistSidebar({
 
         {/* Header Tabel */}
         <div className="grid grid-cols-4 gap-2 mb-3 text-xs font-semibold text-slate-700 border-b border-slate-200 pb-2">
-          <div className="flex items-center">
-            <BarChart3 className="w-3 h-3 mr-1" />
-            Simbol
-          </div>
+          <div className="flex items-center">Simbol</div>
           <div className="text-right">Last</div>
           <div className="text-right">Chg%</div>
           <div className="text-right">Volume</div>
