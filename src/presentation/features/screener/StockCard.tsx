@@ -160,7 +160,7 @@ export function StockCard({ stock, onClick, onSetNotification, hasNotification, 
         {/* Technical Indicators */}
         <div className="mb-4">
           <h4 className="text-xs text-slate-500 font-medium mb-2">Technical Indicators</h4>
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center text-xs">
             <div className="bg-slate-50 rounded-lg p-2 border border-slate-100">
               <div className="text-slate-500 mb-1">RSI(14)</div>
               <div className={cn("font-semibold", 
@@ -188,7 +188,7 @@ export function StockCard({ stock, onClick, onSetNotification, hasNotification, 
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 mt-2 text-center text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 text-center text-xs">
             <div className="bg-slate-50 rounded-lg p-2 border border-slate-100">
               <div className="text-slate-500 mb-1">EMA20 vs EMA50</div>
               <div className={cn("font-semibold", 

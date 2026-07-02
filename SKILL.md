@@ -1,44 +1,44 @@
 ---
-name: make-pwa
-description: "Convert the current Vite React application into a Progressive Web App with manifest, service worker, and installable configuration."
-argument-hint: "What PWA behavior do you want? e.g. web install, offline caching, manifest only, or Electron-compatible web build"
+name: mobile-ux-redesign
+description: "Redesign the current Vite React app for mobile-first UX and UI, optimizing layout, navigation, touch interactions, and responsive behavior."
+argument-hint: "What mobile UX goal do you want? e.g. compact card layout, bottom nav, mobile sidebar, touchscreen polish"
 ---
 
 ## When to use
-- When you want this Vite + React app to behave as an installable PWA in the browser.
-- When you want offline-ready caching, an app manifest, and browser install support.
-- When you need a clear, step-by-step conversion workflow for the current project.
+- When the app already has PWA support and you want it to look and feel great on phones.
+- When the current layout is desktop-first and needs responsive mobile navigation and spacing.
+- When you want a repeatable mobile UX redesign workflow for this project.
 
 ## What this skill does
-1. Review the current Vite app and identify the web build entry points.
-2. Add or confirm a PWA plugin in `vite.config.ts`.
-3. Create a `manifest.webmanifest` and update `index.html` with the required meta tags.
-4. Register a service worker in `src/main.tsx` or equivalent entry file.
-5. Configure caching, navigation fallback, and installability options.
-6. Build and preview the app, then verify PWA behavior in browser devtools.
+1. Audit the current app structure and identify the main screens/components.
+2. Define mobile breakpoints, touch-friendly spacing, and mobile navigation patterns.
+3. Update layouts to use responsive CSS or Tailwind utility classes.
+4. Replace desktop-only sidebars with mobile-friendly drawers, bottom bars, or stacked headers.
+5. Improve tap targets, font sizes, button visibility, and card density for small screens.
+6. Validate the PWA mobile experience with install, splash screen, and full-screen display.
 
 ## Workflow
-1. Confirm the app is a web-targeted Vite application, not only an Electron desktop package.
-2. Install the PWA plugin dependency: `pnpm add -D vite-plugin-pwa`.
-3. Create `manifest.webmanifest` with `name`, `short_name`, `start_url`, `display`, `theme_color`, `background_color`, and icons.
-4. Update `vite.config.ts` to use the PWA plugin with the manifest and service worker registration mode.
-5. Add required meta tags to `index.html` for theme color and mobile display support.
-6. Register the service worker in `src/main.tsx` and handle successful registration or errors.
-7. Add icons to the public assets folder and ensure their paths match the manifest.
-8. Run `pnpm build` and `pnpm preview`, then open the app in a modern browser.
-9. Use browser devtools Application > Manifest and Service Worker panels to verify installation and offline support.
+1. Review the app's current content hierarchy and UI patterns in `src/presentation/features/screener`.
+2. Choose mobile-friendly navigation: bottom navigation, drawer menu, or collapsible filter panel.
+3. Add responsive breakpoints in `src/index.css` or component-level style logic.
+4. Refactor major screens so cards, tables, and sidebars collapse cleanly on narrow widths.
+5. Increase touch target sizes and spacing for buttons, toggles, and list items.
+6. Add or update header metadata for mobile PWA theme color and display behavior.
+7. Test the UI in a mobile browser viewport and iteratively refine spacing, typography, and input usability.
 
 ## Completion criteria
-- `manifest.webmanifest` is served from the web build.
-- A service worker is registered successfully.
-- The app is eligible for installation and shows an install prompt in supported browsers.
-- The app can reload while offline for cached assets/navigation.
+- The app layout adapts at narrow widths without horizontal scrolling.
+- Primary actions are easy to reach and tap on a phone screen.
+- Navigation and filters are accessible on mobile via drawer, bottom nav, or stacked controls.
+- Text and controls remain legible and usable in small viewport sizes.
+- The PWA mobile experience is stable and retains installability.
 
 ## Notes
-- Electron packaging may continue to use the same `dist` web build, but PWA behavior only applies in a browser environment.
-- If the app is meant to work offline, include a shell route fallback and cache the main assets.
+- Keep PWA behavior intact while improving mobile presentation.
+- Mobile UX improvements should focus on speed, accessibility, and touch comfort.
+- If the app is used in Electron desktop mode, the same responsive styles should still work there.
 
 ## Example prompts
-- "Tambahkan dukungan PWA untuk aplikasi ini."
-- "Buat manifest dan service worker untuk Vite React app."
-- "Uji apakah aplikasi bisa diinstall sebagai PWA dan bekerja offline."
+- "Rancang ulang UI agar mendukung tampilan mobile dengan navigasi bawah."
+- "Buat tampilan PWA ini terasa nyaman di HP dan mudah disentuh."
+- "Sesuaikan sidebar screener agar berubah menjadi drawer pada layar kecil."

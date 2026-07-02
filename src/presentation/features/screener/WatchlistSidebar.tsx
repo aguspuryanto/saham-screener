@@ -77,9 +77,9 @@ export function WatchlistSidebar({
         </div>
 
         {/* Header Tabel */}
-        <div className="grid grid-cols-4 gap-2 mb-3 text-xs font-semibold text-slate-700 border-b border-slate-200 pb-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 text-xs font-semibold text-slate-700 border-b border-slate-200 pb-2">
           <div className="flex items-center">Simbol</div>
-          <div className="text-right">Last</div>
+          <div className="text-right hidden sm:block">Last</div>
           <div className="text-right">Chg%</div>
           <div className="text-right">Volume</div>
         </div>
@@ -92,7 +92,7 @@ export function WatchlistSidebar({
             return (
               <div 
                 key={stock.id}
-                className="grid grid-cols-4 gap-2 py-2 px-1 hover:bg-slate-50 rounded cursor-pointer transition-colors group"
+                className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-2 px-1 hover:bg-slate-50 rounded cursor-pointer transition-colors group"
                 onClick={() => onStockClick(stock)}
               >
                 {/* Kolom Simbol */}

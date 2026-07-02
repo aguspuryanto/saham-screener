@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Stock } from '../../../domain/models/Stock';
 import { stockRepository } from '../../../data/repositories/StockRepository';
 import { FilterSidebar, FilterOptions } from './FilterSidebar';
@@ -6,7 +6,7 @@ import { StockCard } from './StockCard';
 import { StockDetailPage } from './StockDetailPage';
 import { WatchlistSidebar } from './WatchlistSidebar';
 import { WatchlistTicker } from './WatchlistTicker';
-import { Search, SlidersHorizontal, RefreshCw, X, Command } from 'lucide-react';
+import { Search, SlidersHorizontal, RefreshCw, X, Command, Home, Star } from 'lucide-react';
 import { NotificationModal, NotificationSetting } from './NotificationModal';
 
 type SortField = 'ticker' | 'name' | 'price' | 'percentChange';
@@ -47,6 +47,16 @@ export function ScreenerPage() {
     oversold: false,
     goldenCross: false,
   });
+  const [mobileNavTab, setMobileNavTab] = useState<'results' | 'filters' | 'watchlist'>('results');
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+  const watchlistRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToSection = useCallback((section: 'results' | 'watchlist') => {
+    const target = section === 'results' ? resultsRef.current : watchlistRef.current;
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
 
   const showBrowserNotification = useCallback((title: string, body: string) => {
     if (!("Notification" in window)) return;
@@ -227,15 +237,17 @@ export function ScreenerPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center mr-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-lg">S</span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight">EzySaham Screener</h1>
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold tracking-tight truncate">EzySaham Screener</h1>
+            </div>
           </div>
-          
-          <div className="flex-1 max-w-md mx-8 hidden md:block relative">
+
+          <div className="flex-1 hidden md:block relative max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-slate-400" />
             </div>
@@ -257,24 +269,46 @@ export function ScreenerPage() {
             )}
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex items-center text-xs text-slate-500">
-              <span className="mr-2">Last updated: {lastUpdated.toLocaleTimeString()}</span>
-              <button 
-                onClick={() => fetchStocks(true)}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
-                title="Refresh data"
-              >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-emerald-600' : ''}`} />
-              </button>
+          <div className="flex-1 sm:hidden relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
             </div>
-            <div className="md:hidden">
-              <button 
-                onClick={() => setShowMobileFilters(!showMobileFilters)}
-                className="p-2 text-slate-500 hover:text-slate-700 focus:outline-none"
+            <input
+              type="text"
+              className="block w-full pl-10 pr-10 py-2 border border-slate-200 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-colors"
+              placeholder="Search ticker or company name..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
+            {filters.search && (
+              <button
+                onClick={() => setFilters({ ...filters, search: '' })}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 focus:outline-none"
+                title="Clear search"
               >
-                <SlidersHorizontal className="h-6 w-6" />
+                <X className="h-4 w-4" />
               </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => fetchStocks(true)}
+              className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+              title="Refresh data"
+            >
+              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin text-emerald-600' : ''}`} />
+            </button>
+            <button
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors md:hidden"
+              title="Open filters"
+            >
+              <SlidersHorizontal className="h-5 w-5" />
+            </button>
+            <div className="hidden sm:flex flex-col text-right text-xs text-slate-500">
+              <span>Last updated</span>
+              <span className="font-medium text-slate-700">{lastUpdated.toLocaleTimeString()}</span>
             </div>
           </div>
         </div>
@@ -283,15 +317,46 @@ export function ScreenerPage() {
       {/* Tampilan watchlist, seperti ticker yg berjalan */}
       <WatchlistTicker favorites={getFavoriteStocks()} />
 
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-30 lg:hidden">
+          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setShowMobileFilters(false)} />
+          <aside className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-2xl border-l border-slate-200 overflow-y-auto">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">Filters & Watchlist</h2>
+                <p className="text-sm text-slate-500">Swipe down or tap close to return.</p>
+              </div>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="p-2 rounded-full text-slate-500 hover:text-slate-700 bg-slate-100"
+                aria-label="Close filters"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <FilterSidebar filters={filters} onChange={setFilters} />
+              <WatchlistSidebar
+                favorites={getFavoriteStocks()}
+                onRemoveFavorite={(stockId) => {
+                  const stock = stocks.find(s => s.id === stockId);
+                  if (stock) handleToggleFavorite(stock);
+                }}
+                onStockClick={handleStockClick}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
         <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* Sidebar Filters */}
-          <div className={`lg:block ${showMobileFilters ? 'block' : 'hidden'}`}>
+          {/* Desktop Sidebar Filters */}
+          <div className="hidden lg:block w-72 shrink-0">
             <FilterSidebar filters={filters} onChange={setFilters} />
-
-            {/* Daftar Pantau */}
             <div className="mt-6">
               <WatchlistSidebar
                 favorites={getFavoriteStocks()}
@@ -307,7 +372,7 @@ export function ScreenerPage() {
 
           {/* Results Area */}
           <div className="flex-1">
-            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div ref={resultsRef} className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
               <div className="w-full sm:w-8/12">
                 <h2 className="text-2xl font-bold text-slate-900">Screening Results</h2>
                 <p className="text-sm text-slate-500 mt-1">
@@ -442,9 +507,65 @@ export function ScreenerPage() {
                 </button>
               </div>
             )}
+
+            <div ref={watchlistRef} className="lg:hidden mt-6">
+              <WatchlistSidebar
+                favorites={getFavoriteStocks()}
+                onRemoveFavorite={(stockId) => {
+                  const stock = stocks.find(s => s.id === stockId);
+                  if (stock) handleToggleFavorite(stock);
+                }}
+                onStockClick={handleStockClick}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            </div>
           </div>
         </div>
       </main>
+
+      <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur-md lg:hidden">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              onClick={() => {
+                setMobileNavTab('results');
+                scrollToSection('results');
+              }}
+              className={`inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium transition ${mobileNavTab === 'results' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Home className="w-5 h-5 mb-1" />
+              Results
+            </button>
+            <button
+              onClick={() => {
+                setMobileNavTab('filters');
+                setShowMobileFilters(true);
+              }}
+              className={`inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium transition ${mobileNavTab === 'filters' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <SlidersHorizontal className="w-5 h-5 mb-1" />
+              Filters
+            </button>
+            <button
+              onClick={() => {
+                setMobileNavTab('watchlist');
+                scrollToSection('watchlist');
+              }}
+              className={`inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium transition ${mobileNavTab === 'watchlist' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Star className="w-5 h-5 mb-1" />
+              Watchlist
+            </button>
+            <button
+              onClick={() => fetchStocks(true)}
+              className="inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 transition"
+            >
+              <RefreshCw className="w-5 h-5 mb-1" />
+              Refresh
+            </button>
+          </div>
+        </div>
+      </nav>
 
       {selectedStockForNotification && (
         <NotificationModal
