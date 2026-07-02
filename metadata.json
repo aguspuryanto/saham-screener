@@ -1,5 +1,5 @@
 {
-  "name": "StockBro Screener",
-  "description": "A stock screening application based on StockBro's analysis guide, featuring technical and fundamental filters.",
+  "name": "EzySaham Screener",
+  "description": "A stock screening application based on EzySaham's analysis guide, featuring technical and fundamental filters.",
   "requestFramePermissions": []
 }

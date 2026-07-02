@@ -232,7 +232,7 @@ export function ScreenerPage() {
             <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center mr-3">
               <span className="text-white font-bold text-lg">S</span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight">StockBro Screener</h1>
+            <h1 className="text-xl font-bold tracking-tight">EzySaham Screener</h1>
           </div>
           
           <div className="flex-1 max-w-md mx-8 hidden md:block relative">
