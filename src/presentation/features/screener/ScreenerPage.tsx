@@ -237,7 +237,7 @@ export function ScreenerPage() {
               <span className="text-white font-black text-sm tracking-tighter">SC</span>
             </div>
             <div className="hidden sm:block">
-              <div className="text-sm font-black text-slate-900 leading-none">S.C.A.N.</div>
+              <div className="text-sm font-black text-slate-900 leading-none">EZYSAHAM S.C.A.N.</div>
               <div className="text-xs text-slate-400">Smart Capital Analysis Navigator</div>
             </div>
           </div>
@@ -248,11 +248,10 @@ export function ScreenerPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 {tab.icon}
                 {tab.label}
@@ -359,11 +358,10 @@ export function ScreenerPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
-                activeTab === tab.id
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${activeTab === tab.id
                   ? 'bg-emerald-600 text-white'
                   : 'bg-white text-slate-600 border border-slate-200'
-              }`}
+                }`}
             >
               {tab.icon}
               {tab.label}
@@ -451,11 +449,10 @@ export function ScreenerPage() {
                             : [...filters.industry, industry.id];
                           setFilters({ ...filters, industry: newIndustries });
                         }}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
-                          isSelected
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isSelected
                             ? 'bg-emerald-600 text-white border-emerald-600'
                             : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-                        }`}
+                          }`}
                       >
                         {industry.label}
                         <span className={`inline-flex items-center justify-center w-4 h-4 text-xs rounded-full ${isSelected ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-500'}`}>
