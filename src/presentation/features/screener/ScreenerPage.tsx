@@ -1,16 +1,21 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Stock } from '../../../domain/models/Stock';
 import { stockRepository } from '../../../data/repositories/StockRepository';
-import { FilterSidebar, FilterOptions } from './FilterSidebar';
+import { FilterSidebar, FilterOptions, DEFAULT_FILTERS } from './FilterSidebar';
 import { StockCard } from './StockCard';
 import { StockDetailPage } from './StockDetailPage';
 import { WatchlistSidebar } from './WatchlistSidebar';
 import { WatchlistTicker } from './WatchlistTicker';
-import { Search, SlidersHorizontal, RefreshCw, X, Command, Home, Star } from 'lucide-react';
+import { ScannerModeTab } from './ScannerModeTab';
+import {
+  Search, SlidersHorizontal, RefreshCw, X,
+  Home, Star, TrendingUp, Zap, BarChart2
+} from 'lucide-react';
 import { NotificationModal, NotificationSetting } from './NotificationModal';
 
-type SortField = 'ticker' | 'name' | 'price' | 'percentChange';
+type SortField = 'ticker' | 'name' | 'price' | 'percentChange' | 'swingScore' | 'scalpingScore';
 type SortDirection = 'asc' | 'desc';
+type AppTab = 'screener' | 'swing' | 'scalping';
 
 interface SortConfig {
   field: SortField;
@@ -22,11 +27,10 @@ export function ScreenerPage() {
   const [filteredStocks, setFilteredStocks] = useState<Stock[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ field: 'ticker', direction: 'asc' });
-  
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ field: 'swingScore', direction: 'desc' });
+  const [activeTab, setActiveTab] = useState<AppTab>('screener');
+
   const [notifications, setNotifications] = useState<Record<string, NotificationSetting>>(() => {
     const saved = localStorage.getItem('stock_notifications');
     return saved ? JSON.parse(saved) : {};
@@ -37,37 +41,25 @@ export function ScreenerPage() {
   });
   const [selectedStockForNotification, setSelectedStockForNotification] = useState<Stock | null>(null);
   const [selectedStockForDetail, setSelectedStockForDetail] = useState<Stock | null>(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const [filters, setFilters] = useState<FilterOptions>({
-    recommendation: [],
-    strategy: [],
-    industry: [],
-    search: '',
-    undervalued: false,
-    oversold: false,
-    goldenCross: false,
-  });
+  const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS);
   const [mobileNavTab, setMobileNavTab] = useState<'results' | 'filters' | 'watchlist'>('results');
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const watchlistRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToSection = useCallback((section: 'results' | 'watchlist') => {
     const target = section === 'results' ? resultsRef.current : watchlistRef.current;
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
   const showBrowserNotification = useCallback((title: string, body: string) => {
     if (!("Notification" in window)) return;
-    
     if (Notification.permission === "granted") {
       new Notification(title, { body });
     } else if (Notification.permission !== "denied") {
       Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          new Notification(title, { body });
-        }
+        if (permission === "granted") new Notification(title, { body });
       });
     }
   }, []);
@@ -75,17 +67,16 @@ export function ScreenerPage() {
   const fetchStocks = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
     else setRefreshing(true);
-    
+
     try {
       const data = await stockRepository.getStocks();
       setStocks(data);
       setLastUpdated(new Date());
-      
-      // Check notifications
+
       if (isRefresh) {
         let notificationsChanged = false;
         const newNotifications = { ...notifications };
-        
+
         Object.values(notifications).forEach((setting: NotificationSetting) => {
           const stock = data.find(s => s.id === setting.stockId);
           if (stock) {
@@ -103,7 +94,7 @@ export function ScreenerPage() {
             }
           }
         });
-        
+
         if (notificationsChanged) {
           setNotifications(newNotifications);
           localStorage.setItem('stock_notifications', JSON.stringify(newNotifications));
@@ -119,78 +110,80 @@ export function ScreenerPage() {
 
   useEffect(() => {
     fetchStocks();
-    
-    // Auto-refresh every 5 minutes
-    const intervalId = setInterval(() => {
-      fetchStocks(true);
-    }, 5 * 60 * 1000);
-    
-    // Request notification permission on mount
+    const intervalId = setInterval(() => fetchStocks(true), 5 * 60 * 1000);
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
-    
     return () => clearInterval(intervalId);
   }, [fetchStocks]);
 
   useEffect(() => {
     let result = stocks;
 
-    // Search filter
+    // Search
     if (filters.search) {
       const query = filters.search.toLowerCase();
-      result = result.filter(s => 
-        s.ticker.toLowerCase().includes(query) || 
+      result = result.filter(s =>
+        s.ticker.toLowerCase().includes(query) ||
         s.name.toLowerCase().includes(query)
       );
     }
 
-    // Recommendation filter
+    // Score filters
+    if (filters.minSwingScore > 0) {
+      result = result.filter(s => s.swingScore.totalScore >= filters.minSwingScore);
+    }
+    if (filters.minScalpingScore > 0) {
+      result = result.filter(s => s.scalpingScore.totalScore >= filters.minScalpingScore);
+    }
+
+    // Price range
+    if (filters.minPrice > 0) {
+      result = result.filter(s => s.lastClose >= filters.minPrice);
+    }
+    if (filters.maxPrice > 0) {
+      result = result.filter(s => s.lastClose <= filters.maxPrice);
+    }
+
+    // Recommendation
     if (filters.recommendation.length > 0) {
       result = result.filter(s => filters.recommendation.includes(s.recommendation));
     }
 
-    // Strategy filter
+    // Strategy
     if (filters.strategy.length > 0) {
       result = result.filter(s => filters.strategy.includes(s.strategy));
     }
 
-    // Industry filter
+    // Industry
     if (filters.industry.length > 0) {
       result = result.filter(s => filters.industry.includes(s.sector));
     }
 
-    // Undervalued filter
+    // Quick screens
     if (filters.undervalued) {
-      result = result.filter(s => s.dcf.status === 'Undervalued' && s.fundamental.pbv < 1);
+      result = result.filter(s => s.dcf.status === 'Undervalued' && s.fundamental.pbv > 0 && s.fundamental.pbv < 1);
     }
-
-    // Oversold filter
     if (filters.oversold) {
       result = result.filter(s => s.technical.rsi14 < 30 || s.technical.rsi12 < 40);
     }
-
-    // Golden Cross filter
     if (filters.goldenCross) {
       result = result.filter(s => s.technical.ema20 > s.technical.ema50);
+    }
+    if (filters.volumeSpike) {
+      result = result.filter(s => s.scalpingScore.volumeScore >= 60);
     }
 
     // Sort
     result.sort((a, b) => {
       let comparison = 0;
       switch (sortConfig.field) {
-        case 'ticker':
-          comparison = a.ticker.localeCompare(b.ticker);
-          break;
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case 'price':
-          comparison = a.lastClose - b.lastClose;
-          break;
-        case 'percentChange':
-          comparison = a.percentChange - b.percentChange;
-          break;
+        case 'ticker': comparison = a.ticker.localeCompare(b.ticker); break;
+        case 'name': comparison = a.name.localeCompare(b.name); break;
+        case 'price': comparison = a.lastClose - b.lastClose; break;
+        case 'percentChange': comparison = a.percentChange - b.percentChange; break;
+        case 'swingScore': comparison = a.swingScore.totalScore - b.swingScore.totalScore; break;
+        case 'scalpingScore': comparison = a.scalpingScore.totalScore - b.scalpingScore.totalScore; break;
       }
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
@@ -206,7 +199,6 @@ export function ScreenerPage() {
   };
 
   const handleStockClick = useCallback((stock: Stock) => {
-    console.log('Stock clicked:', stock.ticker);
     setSelectedStockForDetail(stock);
   }, []);
 
@@ -220,117 +212,128 @@ export function ScreenerPage() {
 
   const handleToggleFavorite = (stock: Stock) => {
     const newFavorites = new Set(favorites);
-    if (newFavorites.has(stock.id)) {
-      newFavorites.delete(stock.id);
-    } else {
-      newFavorites.add(stock.id);
-    }
+    if (newFavorites.has(stock.id)) newFavorites.delete(stock.id);
+    else newFavorites.add(stock.id);
     setFavorites(newFavorites);
     localStorage.setItem('stock_favorites', JSON.stringify(Array.from(newFavorites)));
   };
 
-  const getFavoriteStocks = () => {
-    return stocks.filter(stock => favorites.has(stock.id));
-  };
+  const getFavoriteStocks = () => stocks.filter(stock => favorites.has(stock.id));
+
+  const tabConfig: { id: AppTab; icon: React.ReactNode; label: string; sublabel: string }[] = [
+    { id: 'screener', icon: <BarChart2 className="w-4 h-4" />, label: 'Screener', sublabel: 'Semua Saham' },
+    { id: 'swing', icon: <TrendingUp className="w-4 h-4" />, label: 'Swing Trade', sublabel: '1–3 Hari' },
+    { id: 'scalping', icon: <Zap className="w-4 h-4" />, label: 'Pre-Market', sublabel: 'Scalping' },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-lg">S</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5 min-w-0 flex-shrink-0">
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-black text-sm tracking-tighter">SC</span>
             </div>
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold tracking-tight truncate">EzySaham Screener</h1>
+            <div className="hidden sm:block">
+              <div className="text-sm font-black text-slate-900 leading-none">S.C.A.N.</div>
+              <div className="text-xs text-slate-400">Smart Capital Analysis Navigator</div>
             </div>
           </div>
 
-          <div className="flex-1 hidden md:block relative max-w-md">
+          {/* Desktop Tab Navigation */}
+          <div className="hidden md:flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+            {tabConfig.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search (desktop) */}
+          <div className="flex-1 hidden lg:block relative max-w-xs">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-slate-400" />
             </div>
             <input
               type="text"
-              className="block w-full pl-10 pr-10 py-2 border border-slate-200 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm transition-colors"
-              placeholder="Search ticker or company name..."
+              className="block w-full pl-9 pr-9 py-1.5 border border-slate-200 rounded-lg text-sm bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Cari ticker atau nama..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
             {filters.search && (
-              <button
-                onClick={() => setFilters({ ...filters, search: '' })}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 focus:outline-none"
-                title="Clear search"
-              >
+              <button onClick={() => setFilters({ ...filters, search: '' })} className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
 
-          <div className="flex-1 sm:hidden relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-slate-400" />
-            </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-10 py-2 border border-slate-200 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-colors"
-              placeholder="Search ticker or company name..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            />
-            {filters.search && (
-              <button
-                onClick={() => setFilters({ ...filters, search: '' })}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 focus:outline-none"
-                title="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
+          {/* Right controls */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => fetchStocks(true)}
               className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
               title="Refresh data"
             >
-              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin text-emerald-600' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-emerald-600' : ''}`} />
             </button>
             <button
               onClick={() => setShowMobileFilters(!showMobileFilters)}
-              className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors md:hidden"
-              title="Open filters"
+              className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors lg:hidden"
             >
-              <SlidersHorizontal className="h-5 w-5" />
+              <SlidersHorizontal className="h-4 w-4" />
             </button>
             <div className="hidden sm:flex flex-col text-right text-xs text-slate-500">
-              <span>Last updated</span>
-              <span className="font-medium text-slate-700">{lastUpdated.toLocaleTimeString()}</span>
+              <span>Update</span>
+              <span className="font-medium text-slate-700">{lastUpdated.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile search row */}
+        <div className="lg:hidden px-4 pb-2.5 flex gap-2">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-9 pr-9 py-1.5 border border-slate-200 rounded-lg text-sm bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              placeholder="Cari ticker atau nama..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
+            {filters.search && (
+              <button onClick={() => setFilters({ ...filters, search: '' })} className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Tampilan watchlist, seperti ticker yg berjalan */}
+      {/* Watchlist Ticker */}
       <WatchlistTicker favorites={getFavoriteStocks()} />
 
+      {/* Mobile Filters Drawer */}
       {showMobileFilters && (
         <div className="fixed inset-0 z-30 lg:hidden">
           <div className="absolute inset-0 bg-slate-900/40" onClick={() => setShowMobileFilters(false)} />
           <aside className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-2xl border-l border-slate-200 overflow-y-auto">
             <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">Filters & Watchlist</h2>
-                <p className="text-sm text-slate-500">Swipe down or tap close to return.</p>
-              </div>
-              <button
-                onClick={() => setShowMobileFilters(false)}
-                className="p-2 rounded-full text-slate-500 hover:text-slate-700 bg-slate-100"
-                aria-label="Close filters"
-              >
+              <h2 className="text-lg font-semibold text-slate-900">Filter & Watchlist</h2>
+              <button onClick={() => setShowMobileFilters(false)} className="p-2 rounded-full text-slate-500 hover:text-slate-700 bg-slate-100">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -338,10 +341,7 @@ export function ScreenerPage() {
               <FilterSidebar filters={filters} onChange={setFilters} />
               <WatchlistSidebar
                 favorites={getFavoriteStocks()}
-                onRemoveFavorite={(stockId) => {
-                  const stock = stocks.find(s => s.id === stockId);
-                  if (stock) handleToggleFavorite(stock);
-                }}
+                onRemoveFavorite={(stockId) => { const stock = stocks.find(s => s.id === stockId); if (stock) handleToggleFavorite(stock); }}
                 onStockClick={handleStockClick}
                 onToggleFavorite={handleToggleFavorite}
               />
@@ -351,216 +351,212 @@ export function ScreenerPage() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Desktop Sidebar Filters */}
-          <div className="hidden lg:block w-72 shrink-0">
-            <FilterSidebar filters={filters} onChange={setFilters} />
-            <div className="mt-6">
-              <WatchlistSidebar
-                favorites={getFavoriteStocks()}
-                onRemoveFavorite={(stockId) => {
-                  const stock = stocks.find(s => s.id === stockId);
-                  if (stock) handleToggleFavorite(stock);
-                }}
-                onStockClick={handleStockClick}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            </div>
-          </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28">
 
-          {/* Results Area */}
-          <div className="flex-1">
-            <div ref={resultsRef} className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-              <div className="w-full sm:w-8/12">
-                <h2 className="text-2xl font-bold text-slate-900">Screening Results</h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  Showing {filteredStocks.length} stocks matching your criteria
-                </p>
-                {/* <input
-                  type="text"
-                  placeholder="Search stocks..."
-                  className="mt-2 text-sm border border-slate-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-white w-full"
-                  value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                /> */}
+        {/* Mobile Tab Nav */}
+        <div className="flex md:hidden gap-2 mb-5 overflow-x-auto pb-1">
+          {tabConfig.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
+                activeTab === tab.id
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-white text-slate-600 border border-slate-200'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Swing / Scalping Scanner Mode */}
+        {(activeTab === 'swing' || activeTab === 'scalping') && (
+          <ScannerModeTab
+            stocks={stocks}
+            loading={loading}
+            onStockClick={handleStockClick}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
+          />
+        )}
+
+        {/* Screener Mode */}
+        {activeTab === 'screener' && (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Sidebar */}
+            <div className="hidden lg:block w-64 shrink-0">
+              <FilterSidebar filters={filters} onChange={setFilters} />
+              <div className="mt-5">
+                <WatchlistSidebar
+                  favorites={getFavoriteStocks()}
+                  onRemoveFavorite={(stockId) => { const stock = stocks.find(s => s.id === stockId); if (stock) handleToggleFavorite(stock); }}
+                  onStockClick={handleStockClick}
+                  onToggleFavorite={handleToggleFavorite}
+                />
               </div>
-              
-              <div className="flex items-center space-x-2 w-full sm:w-4/12 justify-end">
-                <span className="text-sm text-slate-500 whitespace-nowrap">Sort by:</span>
+            </div>
+
+            {/* Results */}
+            <div className="flex-1">
+              <div ref={resultsRef} className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Hasil Screening</h2>
+                  <p className="text-sm text-slate-500">
+                    {filteredStocks.length} saham ditemukan
+                    {stocks.length > 0 && ` dari ${stocks.length} total`}
+                  </p>
+                </div>
                 <select
-                  className="text-sm border border-slate-300 rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-white flex-1 min-w-fit"
+                  className="text-sm border border-slate-200 rounded-lg py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white"
                   value={`${sortConfig.field}-${sortConfig.direction}`}
                   onChange={(e) => {
                     const [field, direction] = e.target.value.split('-');
                     setSortConfig({ field: field as SortField, direction: direction as SortDirection });
                   }}
                 >
+                  <option value="swingScore-desc">Swing Score (Tertinggi)</option>
+                  <option value="scalpingScore-desc">Scalping Score (Tertinggi)</option>
+                  <option value="percentChange-desc">Perubahan (Tertinggi)</option>
+                  <option value="percentChange-asc">Perubahan (Terendah)</option>
+                  <option value="price-desc">Harga (Tertinggi)</option>
+                  <option value="price-asc">Harga (Terendah)</option>
                   <option value="ticker-asc">Ticker (A-Z)</option>
-                  <option value="ticker-desc">Ticker (Z-A)</option>
-                  <option value="name-asc">Name (A-Z)</option>
-                  <option value="name-desc">Name (Z-A)</option>
-                  <option value="price-asc">Price (Low to High)</option>
-                  <option value="price-desc">Price (High to Low)</option>
-                  <option value="percentChange-desc">Change (High to Low)</option>
-                  <option value="percentChange-asc">Change (Low to High)</option>
                 </select>
               </div>
-            </div>
 
-            {/* Filter Industry, with badge */}
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">Filter by Industry</h3>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: 'FINANCE', label: 'Finance' },
-                  { id: 'CONSUMER GOODS INDUSTRY', label: 'Consumer Goods' },
-                  { id: 'TRADE, SERVICES, & INVESTMENT', label: 'Trade & Services' },
-                  { id: 'PROPERTY, REAL ESTATE AND BUILDING CONSTRUCTION', label: 'Property & Real Estate' },
-                  { id: 'INFRASTRUCTURE, UTILITIES & TRANSPORTATION', label: 'Infrastructure & Transport' },
-                  { id: 'BASIC INDUSTRY AND CHEMICALS', label: 'Basic Industry & Chemicals' },
-                  { id: 'MINING', label: 'Mining' },
-                  { id: 'AGRICULTURE', label: 'Agriculture' },
-                  { id: 'MISCELLANEOUS INDUSTRY', label: 'Miscellaneous Industry' },
-                  { id: 'Unknown', label: 'Unknown' }
-                ].map(industry => {
-                  const count = stocks.filter(stock => stock.sector === industry.id).length;
-                  const isSelected = filters.industry.includes(industry.id);
-                  
-                  return (
-                    <button
-                      key={industry.id}
-                      onClick={() => {
-                        const newIndustries = isSelected
-                          ? filters.industry.filter(id => id !== industry.id)
-                          : [...filters.industry, industry.id];
-                        setFilters({ ...filters, industry: newIndustries });
-                      }}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        isSelected
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
-                      } border`}
-                    >
-                      {industry.label}
-                      <span className={`inline-flex items-center justify-center w-5 h-5 text-xs rounded-full ${
-                        isSelected ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {count}
-                      </span>
+              {/* Industry filter badges */}
+              <div className="mb-5">
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { id: 'FINANCE', label: 'Keuangan' },
+                    { id: 'MINING', label: 'Tambang' },
+                    { id: 'CONSUMER GOODS INDUSTRY', label: 'Konsumer' },
+                    { id: 'TRADE, SERVICES, & INVESTMENT', label: 'Jasa & Investasi' },
+                    { id: 'PROPERTY, REAL ESTATE AND BUILDING CONSTRUCTION', label: 'Properti' },
+                    { id: 'INFRASTRUCTURE, UTILITIES & TRANSPORTATION', label: 'Infrastruktur' },
+                    { id: 'BASIC INDUSTRY AND CHEMICALS', label: 'Industri Dasar' },
+                    { id: 'AGRICULTURE', label: 'Agrikultur' },
+                    { id: 'MISCELLANEOUS INDUSTRY', label: 'Lainnya' },
+                  ].map(industry => {
+                    const count = stocks.filter(s => s.sector === industry.id).length;
+                    const isSelected = filters.industry.includes(industry.id);
+                    return (
+                      <button
+                        key={industry.id}
+                        onClick={() => {
+                          const newIndustries = isSelected
+                            ? filters.industry.filter(id => id !== industry.id)
+                            : [...filters.industry, industry.id];
+                          setFilters({ ...filters, industry: newIndustries });
+                        }}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+                          isSelected
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        {industry.label}
+                        <span className={`inline-flex items-center justify-center w-4 h-4 text-xs rounded-full ${isSelected ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {filters.industry.length > 0 && (
+                    <button onClick={() => setFilters({ ...filters, industry: [] })} className="text-xs text-slate-500 hover:text-slate-700 underline px-2">
+                      Hapus filter sektor
                     </button>
-                  );
-                })}
-              </div>
-              {filters.industry.length > 0 && (
-                <button
-                  onClick={() => setFilters({ ...filters, industry: [] })}
-                  className="mt-3 text-xs text-slate-500 hover:text-slate-700 underline"
-                >
-                  Clear industry filters
-                </button>
-              )}
-            </div>
-
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-              </div>
-            ) : filteredStocks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredStocks.map(stock => (
-                  <StockCard 
-                    key={stock.id} 
-                    stock={stock} 
-                    onClick={handleStockClick}
-                    onSetNotification={setSelectedStockForNotification}
-                    hasNotification={!!notifications[stock.id]}
-                    onToggleFavorite={handleToggleFavorite}
-                    isFavorite={favorites.has(stock.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-                <div className="mx-auto w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <Search className="h-6 w-6 text-slate-400" />
+                  )}
                 </div>
-                <h3 className="text-lg font-medium text-slate-900 mb-1">No stocks found</h3>
-                <p className="text-slate-500">Try adjusting your filters or search query to find more results.</p>
-                <button 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilters({
-                      recommendation: [],
-                      strategy: [],
-                      industry: [],
-                      search: '',
-                      undervalued: false,
-                      oversold: false,
-                      goldenCross: false
-                    });
-                  }}
-                  className="mt-6 text-emerald-600 hover:text-emerald-700 font-medium text-sm"
-                >
-                  Clear all filters
-                </button>
               </div>
-            )}
 
-            <div ref={watchlistRef} className="lg:hidden mt-6">
-              <WatchlistSidebar
-                favorites={getFavoriteStocks()}
-                onRemoveFavorite={(stockId) => {
-                  const stock = stocks.find(s => s.id === stockId);
-                  if (stock) handleToggleFavorite(stock);
-                }}
-                onStockClick={handleStockClick}
-                onToggleFavorite={handleToggleFavorite}
-              />
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mx-auto mb-3" />
+                    <p className="text-slate-500 text-sm">Memuat data saham...</p>
+                  </div>
+                </div>
+              ) : filteredStocks.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {filteredStocks.map(stock => (
+                    <StockCard
+                      key={stock.id}
+                      stock={stock}
+                      onClick={handleStockClick}
+                      onSetNotification={setSelectedStockForNotification}
+                      hasNotification={!!notifications[stock.id]}
+                      onToggleFavorite={handleToggleFavorite}
+                      isFavorite={favorites.has(stock.id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                  <Search className="h-10 w-10 text-slate-300 mx-auto mb-4" />
+                  <h3 className="text-base font-medium text-slate-900 mb-1">Tidak ada saham ditemukan</h3>
+                  <p className="text-slate-500 text-sm mb-5">Coba sesuaikan filter atau kata kunci pencarian Anda.</p>
+                  <button
+                    onClick={() => setFilters(DEFAULT_FILTERS)}
+                    className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+                  >
+                    Reset semua filter
+                  </button>
+                </div>
+              )}
+
+              <div ref={watchlistRef} className="lg:hidden mt-6">
+                <WatchlistSidebar
+                  favorites={getFavoriteStocks()}
+                  onRemoveFavorite={(stockId) => { const stock = stocks.find(s => s.id === stockId); if (stock) handleToggleFavorite(stock); }}
+                  onStockClick={handleStockClick}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </main>
 
+      {/* Bottom Nav (Mobile) */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur-md lg:hidden">
         <div className="max-w-7xl mx-auto px-4 py-2">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-1">
             <button
-              onClick={() => {
-                setMobileNavTab('results');
-                scrollToSection('results');
-              }}
-              className={`inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium transition ${mobileNavTab === 'results' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              onClick={() => { setActiveTab('screener'); setMobileNavTab('results'); scrollToSection('results'); }}
+              className={`flex flex-col items-center py-1.5 rounded-xl text-xs font-medium transition ${activeTab === 'screener' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
-              <Home className="w-5 h-5 mb-1" />
-              Results
+              <Home className="w-5 h-5 mb-0.5" />
+              Screener
             </button>
             <button
-              onClick={() => {
-                setMobileNavTab('filters');
-                setShowMobileFilters(true);
-              }}
-              className={`inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium transition ${mobileNavTab === 'filters' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              onClick={() => setActiveTab('swing')}
+              className={`flex flex-col items-center py-1.5 rounded-xl text-xs font-medium transition ${activeTab === 'swing' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
-              <SlidersHorizontal className="w-5 h-5 mb-1" />
-              Filters
+              <TrendingUp className="w-5 h-5 mb-0.5" />
+              Swing
             </button>
             <button
-              onClick={() => {
-                setMobileNavTab('watchlist');
-                scrollToSection('watchlist');
-              }}
-              className={`inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium transition ${mobileNavTab === 'watchlist' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              onClick={() => setActiveTab('scalping')}
+              className={`flex flex-col items-center py-1.5 rounded-xl text-xs font-medium transition ${activeTab === 'scalping' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
-              <Star className="w-5 h-5 mb-1" />
+              <Zap className="w-5 h-5 mb-0.5" />
+              Scalping
+            </button>
+            <button
+              onClick={() => { setMobileNavTab('watchlist'); scrollToSection('watchlist'); }}
+              className={`flex flex-col items-center py-1.5 rounded-xl text-xs font-medium transition ${mobileNavTab === 'watchlist' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Star className="w-5 h-5 mb-0.5" />
               Watchlist
             </button>
             <button
               onClick={() => fetchStocks(true)}
-              className="inline-flex flex-col items-center justify-center rounded-2xl px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 transition"
+              className="flex flex-col items-center py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition"
             >
-              <RefreshCw className="w-5 h-5 mb-1" />
+              <RefreshCw className={`w-5 h-5 mb-0.5 ${refreshing ? 'animate-spin text-emerald-600' : ''}`} />
               Refresh
             </button>
           </div>

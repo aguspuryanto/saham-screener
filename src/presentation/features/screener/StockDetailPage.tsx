@@ -43,7 +43,7 @@ interface StockDetailPageProps {
 
 export function StockDetailPage({ stock, onBack, onSetNotification, hasNotification }: StockDetailPageProps) {
   console.log('StockDetailPage rendered for:', stock.ticker);
-  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading'>('trading');
+  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner'>('scanner');
   
   const isPositive = stock.percentChange >= 0;
 
@@ -161,6 +161,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
   const formatPercent = (value: number) => `${(value * 100).toFixed(2)}%`;
 
   const tabs = [
+    { id: 'scanner', label: 'S.C.A.N.', icon: <Target className="w-4 h-4" /> },
     { id: 'trading', label: 'Trading Analysis', icon: <Zap className="w-4 h-4" /> },
     { id: 'overview', label: 'Overview', icon: <Info className="w-4 h-4" /> },
     { id: 'technical', label: 'Technical', icon: <BarChart2 className="w-4 h-4" /> },
@@ -496,7 +497,231 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
 
         {/* Tab Content */}
         <div className="space-y-6">
+          {activeTab === 'scanner' && (
+            <div className="space-y-5">
+              {/* Score cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Swing Score */}
+                <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <div className="text-xs font-medium text-emerald-600 mb-0.5">SWING TRADE SCORE</div>
+                        <div className="text-4xl font-black text-emerald-700">{stock.swingScore.totalScore}</div>
+                        <div className="text-xs text-emerald-600 mt-0.5">dari 100</div>
+                      </div>
+                      <div className={`px-3 py-1.5 rounded-xl text-sm font-bold ${
+                        stock.swingScore.totalScore >= 70 ? 'bg-emerald-600 text-white' :
+                        stock.swingScore.totalScore >= 50 ? 'bg-blue-500 text-white' :
+                        stock.swingScore.totalScore >= 30 ? 'bg-amber-500 text-white' :
+                        'bg-slate-400 text-white'
+                      }`}>
+                        {stock.swingScore.totalScore >= 70 ? 'KUAT' :
+                         stock.swingScore.totalScore >= 50 ? 'CUKUP' :
+                         stock.swingScore.totalScore >= 30 ? 'LEMAH' : 'RENDAH'}
+                      </div>
+                    </div>
+                    <div className="space-y-2.5">
+                      {[
+                        { label: 'Momentum (30%)', score: stock.swingScore.momentumScore, color: 'bg-blue-400' },
+                        { label: 'Breakout (25%)', score: stock.swingScore.breakoutScore, color: 'bg-emerald-400' },
+                        { label: 'Volume Spike (25%)', score: stock.swingScore.volumeScore, color: 'bg-violet-400' },
+                        { label: 'Fundamental (20%)', score: stock.swingScore.fundamentalScore, color: 'bg-amber-400' },
+                      ].map(({ label, score, color }) => (
+                        <div key={label}>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-slate-600">{label}</span>
+                            <span className="font-bold text-slate-800">{score}</span>
+                          </div>
+                          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div className={`h-full ${color} rounded-full transition-all duration-700`} style={{ width: `${score}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {stock.swingScore.signals.length > 0 && (
+                      <div className="mt-3 space-y-1">
+                        {stock.swingScore.signals.map((sig, i) => (
+                          <div key={i} className="text-xs text-emerald-700 bg-emerald-100 rounded-lg px-3 py-1.5">{sig}</div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Scalping Score */}
+                <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-white">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <div className="text-xs font-medium text-violet-600 mb-0.5">SCALPING SCORE</div>
+                        <div className="text-4xl font-black text-violet-700">{stock.scalpingScore.totalScore}</div>
+                        <div className="text-xs text-violet-600 mt-0.5">dari 100</div>
+                      </div>
+                      <div className={`px-3 py-1.5 rounded-xl text-sm font-bold ${
+                        stock.scalpingScore.totalScore >= 70 ? 'bg-violet-600 text-white' :
+                        stock.scalpingScore.totalScore >= 50 ? 'bg-indigo-500 text-white' :
+                        stock.scalpingScore.totalScore >= 30 ? 'bg-amber-500 text-white' :
+                        'bg-slate-400 text-white'
+                      }`}>
+                        {stock.scalpingScore.totalScore >= 70 ? 'AKTIF' :
+                         stock.scalpingScore.totalScore >= 50 ? 'SEDANG' :
+                         stock.scalpingScore.totalScore >= 30 ? 'RENDAH' : 'PASIF'}
+                      </div>
+                    </div>
+                    <div className="space-y-2.5">
+                      {[
+                        { label: 'Volatilitas (35%)', score: stock.scalpingScore.volatilityScore, color: 'bg-orange-400' },
+                        { label: 'Momentum (35%)', score: stock.scalpingScore.momentumScore, color: 'bg-blue-400' },
+                        { label: 'Volume (30%)', score: stock.scalpingScore.volumeScore, color: 'bg-violet-400' },
+                      ].map(({ label, score, color }) => (
+                        <div key={label}>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-slate-600">{label}</span>
+                            <span className="font-bold text-slate-800">{score}</span>
+                          </div>
+                          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div className={`h-full ${color} rounded-full transition-all duration-700`} style={{ width: `${score}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {stock.scalpingScore.signals.length > 0 && (
+                      <div className="mt-3 space-y-1">
+                        {stock.scalpingScore.signals.map((sig, i) => (
+                          <div key={i} className="text-xs text-violet-700 bg-violet-100 rounded-lg px-3 py-1.5">{sig}</div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Trading Levels */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Card className="border-slate-200">
+                  <CardContent className="p-5">
+                    <div className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                      <TrendingIcon className="w-4 h-4 text-emerald-600" />
+                      Level Swing Trade
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { label: 'Entry', val: stock.swingLevels.entry, color: 'text-blue-600' },
+                        { label: 'Target 1', val: stock.swingLevels.target1, color: 'text-emerald-600' },
+                        { label: 'Target 2', val: stock.swingLevels.target2, color: 'text-emerald-700' },
+                        { label: 'Stop Loss', val: stock.swingLevels.stopLoss, color: 'text-red-500' },
+                      ].map(({ label, val, color }) => (
+                        <div key={label} className="bg-slate-50 rounded-lg p-2.5 text-center">
+                          <div className="text-xs text-slate-500 mb-0.5">{label}</div>
+                          <div className={`text-sm font-bold ${color}`}>{val.toLocaleString('id-ID')}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">
+                      <span>Risk/Reward</span>
+                      <span className={`font-bold ${stock.swingLevels.riskRewardRatio >= 2 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        1 : {stock.swingLevels.riskRewardRatio}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-slate-200">
+                  <CardContent className="p-5">
+                    <div className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-violet-600" />
+                      Level Pre-Market Scalping
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { label: 'Entry', val: stock.scalpingLevels.entry, color: 'text-blue-600' },
+                        { label: 'R1', val: stock.scalpingLevels.target1, color: 'text-emerald-600' },
+                        { label: 'R2', val: stock.scalpingLevels.target2, color: 'text-emerald-700' },
+                        { label: 'S1', val: stock.scalpingLevels.stopLoss, color: 'text-red-500' },
+                      ].map(({ label, val, color }) => (
+                        <div key={label} className="bg-slate-50 rounded-lg p-2.5 text-center">
+                          <div className="text-xs text-slate-500 mb-0.5">{label}</div>
+                          <div className={`text-sm font-bold ${color}`}>{val.toLocaleString('id-ID')}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">
+                      <span>Risk/Reward</span>
+                      <span className={`font-bold ${stock.scalpingLevels.riskRewardRatio >= 2 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        1 : {stock.scalpingLevels.riskRewardRatio}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Multi-period performance */}
+              <Card className="border-slate-200">
+                <CardContent className="p-5">
+                  <div className="text-sm font-semibold text-slate-700 mb-3">Performa Multi-Periode</div>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {[
+                      { label: '1 Hari', val: stock.oneDay },
+                      { label: '1 Minggu', val: stock.oneWeek },
+                      { label: '1 Bulan', val: stock.oneMonth },
+                      { label: '3 Bulan', val: stock.threeMonth },
+                      { label: '6 Bulan', val: stock.sixMonth },
+                      { label: '1 Tahun', val: stock.oneYear },
+                    ].map(({ label, val }) => (
+                      <div key={label} className={`rounded-xl p-3 text-center ${val >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                        <div className="text-xs text-slate-500 mb-1">{label}</div>
+                        <div className={`text-sm font-bold ${val >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                          {val >= 0 ? '+' : ''}{val.toFixed(1)}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Annual range position */}
+              <Card className="border-slate-200">
+                <CardContent className="p-5">
+                  <div className="text-sm font-semibold text-slate-700 mb-4">Posisi dalam Rentang Tahunan</div>
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                    <span>Annual Low: Rp {stock.annualLow.toLocaleString('id-ID')}</span>
+                    <span>Annual High: Rp {stock.annualHigh.toLocaleString('id-ID')}</span>
+                  </div>
+                  <div className="relative h-3 bg-slate-100 rounded-full overflow-hidden mb-2">
+                    <div
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-red-400 via-amber-400 to-emerald-500 rounded-full"
+                      style={{ width: `${Math.min(100, Math.max(0, ((stock.lastClose - stock.annualLow) / Math.max(1, stock.annualHigh - stock.annualLow)) * 100))}%` }}
+                    />
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-slate-600 rounded-full"
+                      style={{ left: `calc(${Math.min(100, Math.max(0, ((stock.lastClose - stock.annualLow) / Math.max(1, stock.annualHigh - stock.annualLow)) * 100))}% - 6px)` }}
+                    />
+                  </div>
+                  <div className="text-center text-sm font-semibold text-slate-700">
+                    Posisi: {((stock.lastClose - stock.annualLow) / Math.max(1, stock.annualHigh - stock.annualLow) * 100).toFixed(1)}% dari range tahunan
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="bg-slate-50 rounded-lg p-2">
+                      <div className="text-slate-400">Beta</div>
+                      <div className="font-bold">{stock.beta.toFixed(2)}</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-2">
+                      <div className="text-slate-400">Std Dev</div>
+                      <div className="font-bold">{(stock.stdev * 100).toFixed(1)}%</div>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-2">
+                      <div className="text-slate-400">Free Float</div>
+                      <div className="font-bold">{stock.freeFloatPct.toFixed(1)}%</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {activeTab === 'overview' && (
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Technical Overview */}
               <Card className="border-slate-200 mb-6">
