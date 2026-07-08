@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Stock } from '../../../domain/models/Stock';
 import { stockRepository } from '../../../data/repositories/StockRepository';
 import { FilterSidebar, FilterOptions, DEFAULT_FILTERS } from './FilterSidebar';
-import { StockCard } from './StockCard';
+// import { StockCard } from './StockCard';
+import { StockListView } from './StockListView';
 import { StockDetailPage } from './StockDetailPage';
 import { WatchlistSidebar } from './WatchlistSidebar';
 import { WatchlistTicker } from './WatchlistTicker';
@@ -28,7 +29,7 @@ export function ScreenerPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ field: 'swingScore', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ field: 'percentChange', direction: 'desc' });
   const [activeTab, setActiveTab] = useState<AppTab>('screener');
 
   const [notifications, setNotifications] = useState<Record<string, NotificationSetting>>(() => {
@@ -230,7 +231,7 @@ export function ScreenerPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
+        <div className="w-full px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
           {/* Logo */}
           <div className="flex items-center gap-2.5 min-w-0 flex-shrink-0">
             <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
@@ -350,7 +351,7 @@ export function ScreenerPage() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28">
+      <main className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-28">
 
         {/* Mobile Tab Nav */}
         <div className="flex md:hidden gap-2 mb-5 overflow-x-auto pb-1">
@@ -397,7 +398,7 @@ export function ScreenerPage() {
             </div>
 
             {/* Results */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div ref={resultsRef} className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Hasil Screening</h2>
@@ -477,19 +478,33 @@ export function ScreenerPage() {
                   </div>
                 </div>
               ) : filteredStocks.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {filteredStocks.map(stock => (
-                    <StockCard
-                      key={stock.id}
-                      stock={stock}
-                      onClick={handleStockClick}
-                      onSetNotification={setSelectedStockForNotification}
-                      hasNotification={!!notifications[stock.id]}
-                      onToggleFavorite={handleToggleFavorite}
-                      isFavorite={favorites.has(stock.id)}
-                    />
-                  ))}
-                </div>
+                // <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                //   {filteredStocks.map(stock => (
+                //     <StockCard
+                //       key={stock.id}
+                //       stock={stock}
+                //       onClick={handleStockClick}
+                //       onSetNotification={setSelectedStockForNotification}
+                //       hasNotification={!!notifications[stock.id]}
+                //       onToggleFavorite={handleToggleFavorite}
+                //       isFavorite={favorites.has(stock.id)}
+                //     />
+                //   ))}
+                // </div>
+                <StockListView
+                  stocks={filteredStocks}
+                  onClick={handleStockClick}
+                  onToggleFavorite={handleToggleFavorite}
+                  favorites={favorites}
+                  sortField={sortConfig.field}
+                  sortDirection={sortConfig.direction}
+                  onSortChange={(field) => {
+                    setSortConfig((prev: SortConfig) => ({
+                      field,
+                      direction: prev.field === field && prev.direction === 'desc' ? 'asc' : 'desc',
+                    }));
+                  }}
+                />
               ) : (
                 <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
                   <Search className="h-10 w-10 text-slate-300 mx-auto mb-4" />
@@ -519,7 +534,7 @@ export function ScreenerPage() {
 
       {/* Bottom Nav (Mobile) */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur-md lg:hidden">
-        <div className="max-w-7xl mx-auto px-4 py-2">
+        <div className="w-full px-4 py-2">
           <div className="grid grid-cols-5 gap-1">
             <button
               onClick={() => { setActiveTab('screener'); setMobileNavTab('results'); scrollToSection('results'); }}

@@ -3,26 +3,26 @@ import { Stock } from '../../../domain/models/Stock';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { 
-  ArrowDownRight, 
-  ArrowUpRight, 
-  Activity, 
-  TrendingUp, 
-  TrendingDown, 
-  Clock, 
-  BarChart2, 
-  Bell, 
-  BellRing, 
-  Star, 
-  DollarSign, 
-  Target, 
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  BarChart2,
+  Bell,
+  BellRing,
+  Star,
+  DollarSign,
+  Target,
   Users,
   ArrowLeft,
   ChevronDown,
   ChevronUp,
   Info,
   TrendingUp as TrendingIcon,
-  PieChart,
+  Sparkles,
   Calculator,
   AlertTriangle,
   CheckCircle,
@@ -33,6 +33,7 @@ import {
   ArrowUpRight as BullishIcon
 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
+import { AiEngineTab } from './AiEngineTab';
 
 interface StockDetailPageProps {
   stock: Stock;
@@ -42,8 +43,7 @@ interface StockDetailPageProps {
 }
 
 export function StockDetailPage({ stock, onBack, onSetNotification, hasNotification }: StockDetailPageProps) {
-  console.log('StockDetailPage rendered for:', stock.ticker);
-  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner'>('scanner');
+  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner' | 'aiengine'>('scanner');
   
   const isPositive = stock.percentChange >= 0;
 
@@ -162,6 +162,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
 
   const tabs = [
     { id: 'scanner', label: 'S.C.A.N.', icon: <Target className="w-4 h-4" /> },
+    { id: 'aiengine', label: 'AI Engine', icon: <Sparkles className="w-4 h-4" /> },
     { id: 'trading', label: 'Trading Analysis', icon: <Zap className="w-4 h-4" /> },
     { id: 'overview', label: 'Overview', icon: <Info className="w-4 h-4" /> },
     { id: 'technical', label: 'Technical', icon: <BarChart2 className="w-4 h-4" /> },
@@ -408,7 +409,6 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
               </CardContent>
             </Card>
 
-            
           </div>
 
           {/* Broker Consensus Card */}
@@ -468,6 +468,87 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
                     </div>
                     <span className="text-slate-900 font-medium">5%</span>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Kesimpulan Analisis */}
+            <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 mb-6">
+              <CardHeader className="pb-3">
+                <h3 className="text-lg font-semibold text-emerald-900 flex items-center">
+                  <span className="mr-2 text-xl">📊</span>
+                  Kesimpulan Analisis
+                </h3>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="overflow-x-auto rounded-lg border border-emerald-200">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-emerald-100 text-emerald-800">
+                        <th className="text-left px-4 py-2 font-semibold">Indikator</th>
+                        <th className="text-center px-4 py-2 font-semibold">Nilai</th>
+                        <th className="text-left px-4 py-2 font-semibold">Penilaian</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-emerald-100">
+                      <tr className="bg-white/70 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">Fundamental</td>
+                        <td className="px-4 py-2 text-center text-base">⭐⭐⭐⭐⭐</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Sangat Baik</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white/40 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">PER</td>
+                        <td className="px-4 py-2 text-center text-base">⭐⭐⭐⭐☆</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">Wajar</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white/70 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">ROE</td>
+                        <td className="px-4 py-2 text-center text-base">⭐⭐⭐⭐⭐</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Sangat Baik</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white/40 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">Momentum</td>
+                        <td className="px-4 py-2 text-center text-base">⭐⭐⭐⭐☆</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">Baik</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white/70 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">MACD</td>
+                        <td className="px-4 py-2 text-center text-base">✅</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Positif</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white/40 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">EMA</td>
+                        <td className="px-4 py-2 text-center text-base">❌</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">Perlu Konfirmasi</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white/70 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">Scalping</td>
+                        <td className="px-4 py-2 text-center text-base">⭐⭐⭐☆☆</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">Cukup</span>
+                        </td>
+                      </tr>
+                      <tr className="bg-white/40 hover:bg-emerald-50 transition-colors">
+                        <td className="px-4 py-2 font-medium text-slate-700">Swing</td>
+                        <td className="px-4 py-2 text-center text-base">⭐⭐⭐⭐⭐</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Sangat Baik</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>
@@ -1523,6 +1604,9 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
               </Card>
             </div>
           )}
+
+          {activeTab === 'aiengine' && <AiEngineTab stock={stock} />}
+
         </div>
       </div>
     </div>

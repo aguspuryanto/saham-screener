@@ -26,6 +26,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  process.env.SQLITE_DB_PATH = path.join(app.getPath('userData'), 'app.db');
   server = startServer();
   
   setTimeout(createWindow, 1000);

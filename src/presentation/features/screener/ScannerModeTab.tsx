@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Stock } from '../../../domain/models/Stock';
 import { cn } from '../../../utils/cn';
+import { formatCompactNumber } from '../../../utils/format';
 import {
   TrendingUp, Zap, ChevronRight, ArrowUpRight, ArrowDownRight,
   Target, Shield, Star, BarChart2, Info, RefreshCw
@@ -189,6 +190,30 @@ const ScannerCard: React.FC<ScannerCardProps> = ({
               {sig}
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Scalping Entry Metrics */}
+      {mode === 'scalping' && (
+        <div className="grid grid-cols-3 gap-2 text-center text-xs mb-3 pt-3 border-t border-slate-100">
+          <div>
+            <div className="text-slate-400 mb-0.5">Nilai Transaksi</div>
+            <div className="font-semibold text-slate-800">
+              {formatCompactNumber(stock.value)} <span className="text-slate-400 font-normal">IDR</span>
+            </div>
+          </div>
+          <div>
+            <div className="text-slate-400 mb-0.5">RVOL</div>
+            <div className="font-semibold text-slate-800">
+              {stock.technical.volRatio.toFixed(2)}x
+            </div>
+          </div>
+          <div>
+            <div className="text-slate-400 mb-0.5">RSI(14)</div>
+            <div className="font-semibold text-slate-800">
+              {stock.technical.rsi14}
+            </div>
+          </div>
         </div>
       )}
 

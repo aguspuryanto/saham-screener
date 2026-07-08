@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+const { getDb } = require('./server/db');
+const { registerHistoryRoutes } = require('./server/historyRoutes');
 
 function startServer() {
   const app = express();
@@ -17,6 +19,9 @@ function startServer() {
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
   });
+
+  const db = getDb();
+  registerHistoryRoutes(app, db);
 
   app.get("/api/stocks", async (req, res) => {
     try {
