@@ -591,6 +591,7 @@ export function ScreenerPage() {
           onBack={() => setSelectedStockForDetail(null)}
           onSetNotification={setSelectedStockForNotification}
           hasNotification={!!notifications[selectedStockForDetail.id]}
+          allStocks={stocks}
         />
       )}
     </div>

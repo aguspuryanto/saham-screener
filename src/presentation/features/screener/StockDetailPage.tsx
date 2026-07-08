@@ -30,20 +30,23 @@ import {
   Zap,
   Shield,
   TrendingDown as BearishIcon,
-  ArrowUpRight as BullishIcon
+  ArrowUpRight as BullishIcon,
+  Moon
 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import { AiEngineTab } from './AiEngineTab';
+import { AfterCloseScoreTab } from './AfterCloseScoreTab';
 
 interface StockDetailPageProps {
   stock: Stock;
   onBack: () => void;
   onSetNotification?: (stock: Stock) => void;
   hasNotification?: boolean;
+  allStocks?: Stock[];
 }
 
-export function StockDetailPage({ stock, onBack, onSetNotification, hasNotification }: StockDetailPageProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner' | 'aiengine'>('scanner');
+export function StockDetailPage({ stock, onBack, onSetNotification, hasNotification, allStocks }: StockDetailPageProps) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner' | 'aiengine' | 'afterclose'>('scanner');
   
   const isPositive = stock.percentChange >= 0;
 
@@ -163,6 +166,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
   const tabs = [
     { id: 'scanner', label: 'S.C.A.N.', icon: <Target className="w-4 h-4" /> },
     { id: 'aiengine', label: 'AI Engine', icon: <Sparkles className="w-4 h-4" /> },
+    { id: 'afterclose', label: 'After Close', icon: <Moon className="w-4 h-4" /> },
     { id: 'trading', label: 'Trading Analysis', icon: <Zap className="w-4 h-4" /> },
     { id: 'overview', label: 'Overview', icon: <Info className="w-4 h-4" /> },
     { id: 'technical', label: 'Technical', icon: <BarChart2 className="w-4 h-4" /> },
@@ -1606,6 +1610,8 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
           )}
 
           {activeTab === 'aiengine' && <AiEngineTab stock={stock} />}
+
+          {activeTab === 'afterclose' && <AfterCloseScoreTab stock={stock} allStocks={allStocks} />}
 
         </div>
       </div>
