@@ -64,16 +64,16 @@ function mapApiItemToStock(item: RawApiStock): Stock {
   // DCF: use PBV as primary signal, swing score as secondary
   const dcfStatus: 'Undervalued' | 'Fair Value' | 'Overvalued' =
     pbr > 0 && pbr < 1 ? 'Undervalued' :
-    pbr > 3 ? 'Overvalued' :
-    'Fair Value';
+      pbr > 3 ? 'Overvalued' :
+        'Fair Value';
 
   // Consensus rating
   const consensusRating: 'Strong Buy' | 'Buy' | 'Hold' | 'Sell' | 'Strong Sell' =
     swingScore.totalScore >= 75 ? 'Strong Buy' :
-    swingScore.totalScore >= 55 ? 'Buy' :
-    swingScore.totalScore >= 35 ? 'Hold' :
-    swingScore.totalScore >= 20 ? 'Sell' :
-    'Strong Sell';
+      swingScore.totalScore >= 55 ? 'Buy' :
+        swingScore.totalScore >= 35 ? 'Hold' :
+          swingScore.totalScore >= 20 ? 'Sell' :
+            'Strong Sell';
 
   const lastDate = item.LastDate || item.LastUpdate || new Date().toISOString();
 
@@ -163,7 +163,8 @@ function mapApiItemToStock(item: RawApiStock): Stock {
 export class ApiStockRepository implements StockRepository {
   async getStocks(): Promise<Stock[]> {
     try {
-      const response = await axios.get('http://localhost:3001/api/stocks');
+      const baseUrl = process.env.VITE_API_URL;
+      const response = await axios.get(`${baseUrl}/api/stocks`);
       const data: RawApiStock[] = response.data;
 
       return data
