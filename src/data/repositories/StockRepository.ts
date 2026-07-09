@@ -163,8 +163,10 @@ function mapApiItemToStock(item: RawApiStock): Stock {
 export class ApiStockRepository implements StockRepository {
   async getStocks(): Promise<Stock[]> {
     try {
-      const baseUrl = process.env.VITE_API_URL;
-      const response = await axios.get(`${baseUrl}/api/stocks`);
+      // Menggunakan relative URL agar kompatibel di semua environment:
+      // - Development lokal: diteruskan ke server.ts (port 3001) via proxy
+      // - Production (Vercel): ditangani oleh api/stocks.js (serverless function)
+      const response = await axios.get('/api/stocks');
       const data: RawApiStock[] = response.data;
 
       return data
