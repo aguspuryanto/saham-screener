@@ -1,0 +1,910 @@
+{
+  "meta": {
+    "nObservations": 14152,
+    "tickers": 35,
+    "dateRange": [
+      "2024-09-30",
+      "2026-07-09"
+    ],
+    "winDefinition": "High(t+1) >= Open(t+1) * (1 + 5/100)",
+    "pnlSimulation": "take-profit at +5% if intraday high touches it, else exit at close of entry day",
+    "sectorMapAvailable": true
+  },
+  "overall": {
+    "n": 14152,
+    "wins": 2809,
+    "losses": 11343,
+    "winRate": 19.848784624081404,
+    "avgProfit": 3.6094323598462954,
+    "avgLoss": -3.5963483712613598,
+    "profitFactor": 0.9211297835415924,
+    "expectancy": -0.10995443986105727,
+    "avgReturnClose": -0.005541200841684888,
+    "medianReturnClose": 0,
+    "avgMfe": 3.1405815128161283,
+    "avgMae": -2.847736001635722,
+    "sharpeUnannualized": -0.02851499694153283,
+    "maxDrawdownPct": -2090.1888405963678,
+    "finalCumPct": -1556.0752329136787
+  },
+  "holding": {
+    "h1": {
+      "n": 14152,
+      "avgReturn": -0.005541200841684888
+    },
+    "h3": {
+      "n": 14152,
+      "avgReturn": 0.7437730604201603
+    },
+    "h5": {
+      "n": 14152,
+      "avgReturn": 1.5364265960412087
+    }
+  },
+  "momentumBucket": {
+    "90-100": {
+      "n": 4261,
+      "wins": 1024,
+      "losses": 3237,
+      "winRate": 24.031917390283972,
+      "avgProfit": 3.7770935667335785,
+      "avgLoss": -3.8610864363681077,
+      "profitFactor": 0.9690824121328776,
+      "expectancy": -0.04785104867484598,
+      "avgReturnClose": 0.019944321639508964,
+      "medianReturnClose": 0,
+      "avgMfe": 3.699098855485255,
+      "avgMae": -3.2245425776092764
+    },
+    "80-89": {
+      "n": 1836,
+      "wins": 305,
+      "losses": 1531,
+      "winRate": 16.61220043572985,
+      "avgProfit": 3.535138017457386,
+      "avgLoss": -3.6475138205935145,
+      "profitFactor": 0.7579903839552351,
+      "expectancy": -0.3596321337643669,
+      "avgReturnClose": -0.2049980021120448,
+      "medianReturnClose": 0,
+      "avgMfe": 2.731290723255816,
+      "avgMae": -2.8128000441208725
+    },
+    "60-69": {
+      "n": 612,
+      "wins": 126,
+      "losses": 486,
+      "winRate": 20.588235294117645,
+      "avgProfit": 3.668643487535237,
+      "avgLoss": -4.050033578329968,
+      "profitFactor": 0.8687736902767836,
+      "expectancy": -0.19105165255336326,
+      "avgReturnClose": -0.1623692562381385,
+      "medianReturnClose": 0,
+      "avgMfe": 3.092782782896566,
+      "avgMae": -2.930574650707921
+    },
+    "<60": {
+      "n": 6860,
+      "wins": 1223,
+      "losses": 5637,
+      "winRate": 17.82798833819242,
+      "avgProfit": 3.503730472900726,
+      "avgLoss": -3.376024060502754,
+      "profitFactor": 0.9315075332260352,
+      "expectancy": -0.08686376386242126,
+      "avgReturnClose": 0.042233650628098036,
+      "medianReturnClose": 0,
+      "avgMfe": 2.867458678580015,
+      "avgMae": -2.598976434029237
+    },
+    "70-79": {
+      "n": 583,
+      "wins": 131,
+      "losses": 452,
+      "winRate": 22.46998284734134,
+      "avgProfit": 3.5742799872263458,
+      "avgLoss": -3.4998703968707283,
+      "profitFactor": 1.0256437632352817,
+      "expectancy": 0.035869150154519844,
+      "avgReturnClose": 0.03880213476711608,
+      "medianReturnClose": 0,
+      "avgMfe": 3.6114064838113302,
+      "avgMae": -3.0438989147095166
+    }
+  },
+  "sectorBucket": {
+    "TRADE, SERVICES, & INVESTMENT": {
+      "n": 2323,
+      "wins": 490,
+      "losses": 1833,
+      "winRate": 21.093413689195007,
+      "avgProfit": 3.5996534241770846,
+      "avgLoss": -3.9466350420420424,
+      "profitFactor": 0.864512771303513,
+      "expectancy": -0.20302274837238132,
+      "avgReturnClose": -0.14442639478765287,
+      "medianReturnClose": 0,
+      "avgMfe": 3.368566324399596,
+      "avgMae": -3.027345358014252
+    },
+    "PROPERTY, REAL ESTATE AND BUILDING CONSTRUCTION": {
+      "n": 3784,
+      "wins": 864,
+      "losses": 2920,
+      "winRate": 22.832980972515855,
+      "avgProfit": 4.043088261257601,
+      "avgLoss": -4.324157573361252,
+      "profitFactor": 0.9711006095146615,
+      "expectancy": -0.042767004786298225,
+      "avgReturnClose": 0.1351697151147404,
+      "medianReturnClose": 0,
+      "avgMfe": 3.368868064142042,
+      "avgMae": -2.954530986741917
+    },
+    "FINANCE": {
+      "n": 478,
+      "wins": 26,
+      "losses": 452,
+      "winRate": 5.439330543933055,
+      "avgProfit": 2.1675586122895374,
+      "avgLoss": -1.9401567673968896,
+      "profitFactor": 0.7325953931058283,
+      "expectancy": -0.26483027882534527,
+      "avgReturnClose": -0.21846175411609445,
+      "medianReturnClose": -0.41580221300138315,
+      "avgMfe": 1.6318070725004534,
+      "avgMae": -1.8173554512630374
+    },
+    "MINING": {
+      "n": 1680,
+      "wins": 315,
+      "losses": 1365,
+      "winRate": 18.75,
+      "avgProfit": 3.242328682318771,
+      "avgLoss": -2.951140589190769,
+      "profitFactor": 0.9837095399501878,
+      "expectancy": -0.0216053307092497,
+      "avgReturnClose": 0.04569527552686805,
+      "medianReturnClose": 0,
+      "avgMfe": 3.1324373374190224,
+      "avgMae": -2.8732042218979013
+    },
+    "BASIC INDUSTRY AND CHEMICALS": {
+      "n": 1680,
+      "wins": 226,
+      "losses": 1454,
+      "winRate": 13.452380952380953,
+      "avgProfit": 3.2903714832109836,
+      "avgLoss": -3.4316517078506275,
+      "profitFactor": 0.8100197996951368,
+      "expectancy": -0.24253938944717018,
+      "avgReturnClose": 0.03504744646120883,
+      "medianReturnClose": 0,
+      "avgMfe": 2.2062761088446043,
+      "avgMae": -2.3331288687015417
+    },
+    "CONSUMER GOODS INDUSTRY": {
+      "n": 843,
+      "wins": 200,
+      "losses": 643,
+      "winRate": 23.72479240806643,
+      "avgProfit": 3.611803347600314,
+      "avgLoss": -3.7672397493121244,
+      "profitFactor": 0.8541501606157549,
+      "expectancy": -0.2509356527381469,
+      "avgReturnClose": -0.06998789861700792,
+      "medianReturnClose": 0,
+      "avgMfe": 3.85238356866355,
+      "avgMae": -3.927883590981651
+    },
+    "MISCELLANEOUS INDUSTRY": {
+      "n": 841,
+      "wins": 179,
+      "losses": 662,
+      "winRate": 21.284185493460168,
+      "avgProfit": 4.386026575813159,
+      "avgLoss": -4.476535148914547,
+      "profitFactor": 1.0018487086466312,
+      "expectancy": 0.0021845774679638266,
+      "avgReturnClose": 0.13508338390912852,
+      "medianReturnClose": 0,
+      "avgMfe": 3.075373413670137,
+      "avgMae": -2.494388701675441
+    },
+    "INFRASTRUCTURE, UTILITIES & TRANSPORTATION": {
+      "n": 2101,
+      "wins": 417,
+      "losses": 1684,
+      "winRate": 19.847691575440265,
+      "avgProfit": 3.501593924703254,
+      "avgLoss": -3.157463450804872,
+      "profitFactor": 0.9444622089089808,
+      "expectancy": -0.0736989984216333,
+      "avgReturnClose": -0.1611133532475291,
+      "medianReturnClose": 0,
+      "avgMfe": 3.145274683300081,
+      "avgMae": -2.739058753389032
+    },
+    "AGRICULTURE": {
+      "n": 422,
+      "wins": 92,
+      "losses": 330,
+      "winRate": 21.80094786729858,
+      "avgProfit": 3.4679347330951553,
+      "avgLoss": -2.9248254003098397,
+      "profitFactor": 1.0215170978582477,
+      "expectancy": 0.02908076326911645,
+      "avgReturnClose": -0.004094757930906311,
+      "medianReturnClose": -0.5899552803577571,
+      "avgMfe": 3.984171501916251,
+      "avgMae": -3.103333342564582
+    }
+  },
+  "rvolBucket": {
+    "<2x": {
+      "n": 12301,
+      "wins": 2297,
+      "losses": 10004,
+      "winRate": 18.67327859523616,
+      "avgProfit": 3.509880205269751,
+      "avgLoss": -3.3886790061066896,
+      "profitFactor": 0.9394815453778768,
+      "expectancy": -0.07980705234951911,
+      "avgReturnClose": 0.054462304015172595,
+      "medianReturnClose": 0,
+      "avgMfe": 2.9914457612674887,
+      "avgMae": -2.66762610192196
+    },
+    "3-5x": {
+      "n": 576,
+      "wins": 138,
+      "losses": 438,
+      "winRate": 23.958333333333336,
+      "avgProfit": 4.138895001441394,
+      "avgLoss": -4.957902435674536,
+      "profitFactor": 0.6985838278170985,
+      "expectancy": -0.6200688920797464,
+      "avgReturnClose": -0.5711249257551043,
+      "medianReturnClose": 0,
+      "avgMfe": 3.764328661535091,
+      "avgMae": -3.9687974052970483
+    },
+    "2-3x": {
+      "n": 838,
+      "wins": 219,
+      "losses": 619,
+      "winRate": 26.13365155131265,
+      "avgProfit": 3.9755371463190805,
+      "avgLoss": -4.148834818530639,
+      "profitFactor": 1.0524286584984608,
+      "expectancy": 0.07657251066926479,
+      "avgReturnClose": 0.21444856489819195,
+      "medianReturnClose": 0,
+      "avgMfe": 3.645321485884488,
+      "avgMae": -3.286479711589571
+    },
+    ">5x": {
+      "n": 437,
+      "wins": 155,
+      "losses": 282,
+      "winRate": 35.46910755148742,
+      "avgProfit": 4.8386925730719375,
+      "avgLoss": -6.661307932814018,
+      "profitFactor": 0.7439971640994824,
+      "expectancy": -0.6438827552978394,
+      "avgReturnClose": -1.3709377943979595,
+      "medianReturnClose": -0.7575757575757576,
+      "avgMfe": 5.548518411457923,
+      "avgMae": -5.598613070122212
+    }
+  },
+  "valueBucket": {
+    "<10B": {
+      "n": 11212,
+      "wins": 2030,
+      "losses": 9182,
+      "winRate": 18.105601141633965,
+      "avgProfit": 3.5687452158942357,
+      "avgLoss": -3.4729004110713166,
+      "profitFactor": 0.9602393513176513,
+      "expectancy": -0.04997752492476524,
+      "avgReturnClose": 0.10831844611441646,
+      "medianReturnClose": 0,
+      "avgMfe": 2.897024511562342,
+      "avgMae": -2.5402987221099673
+    },
+    "10-20B": {
+      "n": 1011,
+      "wins": 212,
+      "losses": 799,
+      "winRate": 20.969337289812067,
+      "avgProfit": 3.2851810286847867,
+      "avgLoss": -3.0996186494930393,
+      "profitFactor": 0.9062937476321146,
+      "expectancy": -0.1407737756999638,
+      "avgReturnClose": -0.31346846143956025,
+      "medianReturnClose": -0.5524861878453038,
+      "avgMfe": 3.4980995341639436,
+      "avgMae": -3.4496397023303866
+    },
+    "20-50B": {
+      "n": 816,
+      "wins": 213,
+      "losses": 603,
+      "winRate": 26.10294117647059,
+      "avgProfit": 3.7986363900512083,
+      "avgLoss": -3.9481474553813074,
+      "profitFactor": 0.8122515810131591,
+      "expectancy": -0.3615451717947974,
+      "avgReturnClose": -0.4458606506351755,
+      "medianReturnClose": -0.6968725718725719,
+      "avgMfe": 4.03238408127266,
+      "avgMae": -4.204608468863464
+    },
+    "50-100B": {
+      "n": 385,
+      "wins": 115,
+      "losses": 270,
+      "winRate": 29.87012987012987,
+      "avgProfit": 4.015643262561464,
+      "avgLoss": -4.757203750255952,
+      "profitFactor": 0.736358612400985,
+      "expectancy": -0.6124384675013996,
+      "avgReturnClose": -0.7501146718445894,
+      "medianReturnClose": -0.9259259259259258,
+      "avgMfe": 4.390802052164672,
+      "avgMae": -4.549044279402885
+    },
+    ">100B": {
+      "n": 728,
+      "wins": 239,
+      "losses": 489,
+      "winRate": 32.82967032967033,
+      "avgProfit": 4.103123148206561,
+      "avgLoss": -4.693202176337731,
+      "profitFactor": 0.8047252622885327,
+      "expectancy": -0.44312536545598163,
+      "avgReturnClose": -0.44416543688529925,
+      "medianReturnClose": -0.7561679865061894,
+      "avgMfe": 4.734351533372721,
+      "avgMae": -4.3261020956496585
+    }
+  },
+  "rsiHighBucket": {
+    "60-70": {
+      "n": 1874,
+      "wins": 462,
+      "losses": 1412,
+      "winRate": 24.653148345784416,
+      "avgProfit": 3.8359740475922153,
+      "avgLoss": -3.8751506018527286,
+      "profitFactor": 0.9547165468774916,
+      "expectancy": -0.07378783249192387,
+      "avgReturnClose": 0.17356379621822463,
+      "medianReturnClose": 0,
+      "avgMfe": 3.8749197126438086,
+      "avgMae": -3.268834100949754
+    },
+    "70-80": {
+      "n": 827,
+      "wins": 212,
+      "losses": 615,
+      "winRate": 25.634824667472795,
+      "avgProfit": 4.1848983627411,
+      "avgLoss": -4.795706966875081,
+      "profitFactor": 0.7930544368997869,
+      "expectancy": -0.38161933329395176,
+      "avgReturnClose": -0.5179487155200694,
+      "medianReturnClose": 0,
+      "avgMfe": 3.6653138246573493,
+      "avgMae": -3.740138046309506
+    },
+    "80-90": {
+      "n": 242,
+      "wins": 58,
+      "losses": 184,
+      "winRate": 23.96694214876033,
+      "avgProfit": 4.479110030326501,
+      "avgLoss": -8.15694881397397,
+      "profitFactor": 0.5265494627137527,
+      "expectancy": -1.1649568648646476,
+      "avgReturnClose": -1.0457286089284445,
+      "medianReturnClose": 0,
+      "avgMfe": 3.8638070343970723,
+      "avgMae": -4.646120235210163
+    },
+    ">90": {
+      "n": 715,
+      "wins": 23,
+      "losses": 692,
+      "winRate": 3.2167832167832167,
+      "avgProfit": 4.697572698870464,
+      "avgLoss": -10.20411044890481,
+      "profitFactor": 0.5754510305421388,
+      "expectancy": -0.12117886923962892,
+      "avgReturnClose": -0.1978474184565651,
+      "medianReturnClose": 0,
+      "avgMfe": 0.4753251222749352,
+      "avgMae": -0.5900652433750775
+    }
+  },
+  "rsiAllBucket": {
+    "50-70": {
+      "n": 5581,
+      "wins": 1147,
+      "losses": 4434,
+      "winRate": 20.55187242429672,
+      "avgProfit": 3.583418261242917,
+      "avgLoss": -3.50928907877888,
+      "profitFactor": 0.9172658226655546,
+      "expectancy": -0.12173289002149723,
+      "avgReturnClose": 0.026632055185527356,
+      "medianReturnClose": 0,
+      "avgMfe": 3.2840839779724265,
+      "avgMae": -2.960895049614514
+    },
+    ">=70 (overbought)": {
+      "n": 1784,
+      "wins": 293,
+      "losses": 1491,
+      "winRate": 16.423766816143498,
+      "avgProfit": 4.271907933403109,
+      "avgLoss": -5.655898510619148,
+      "profitFactor": 0.7056830383914301,
+      "expectancy": -0.3834986779359172,
+      "avgReturnClose": -0.46125045700236805,
+      "medianReturnClose": 0,
+      "avgMfe": 2.4137406377479236,
+      "avgMae": -2.600533581968608
+    },
+    "30-50": {
+      "n": 6289,
+      "wins": 1225,
+      "losses": 5064,
+      "winRate": 19.478454444267772,
+      "avgProfit": 3.4930227495826665,
+      "avgLoss": -3.292818854371879,
+      "profitFactor": 0.9678348827786176,
+      "expectancy": -0.043045943671129766,
+      "avgReturnClose": 0.04497206516845392,
+      "medianReturnClose": 0,
+      "avgMfe": 3.1225084635750453,
+      "avgMae": -2.76838868737827
+    },
+    "<30 (oversold)": {
+      "n": 498,
+      "wins": 144,
+      "losses": 354,
+      "winRate": 28.915662650602407,
+      "avgProfit": 3.940115429676901,
+      "avgLoss": -4.339728719319428,
+      "profitFactor": 1.1006597011565535,
+      "expectancy": 0.15701527606769097,
+      "avgReturnClose": 0.6284918135459125,
+      "medianReturnClose": 0,
+      "avgMfe": 4.3643932994860535,
+      "avgMae": -3.4671812411565615
+    }
+  },
+  "emaBucket": {
+    "golden": {
+      "n": 7370,
+      "wins": 1650,
+      "losses": 5720,
+      "winRate": 22.388059701492537,
+      "avgProfit": 3.734271019267155,
+      "avgLoss": -3.857365462719888,
+      "profitFactor": 0.9283771514977642,
+      "expectancy": -0.10874833537980552,
+      "avgReturnClose": -0.0040191212836432925,
+      "medianReturnClose": 0,
+      "avgMfe": 3.3884941921079443,
+      "avgMae": -3.0891083684425533
+    },
+    "sideways": {
+      "n": 1475,
+      "wins": 130,
+      "losses": 1345,
+      "winRate": 8.813559322033898,
+      "avgProfit": 3.140362899851606,
+      "avgLoss": -2.9840197488504536,
+      "profitFactor": 0.84082983476307,
+      "expectancy": -0.12494044989829012,
+      "avgReturnClose": -0.06949184399978016,
+      "medianReturnClose": 0,
+      "avgMfe": 1.6228448672911857,
+      "avgMae": -1.5776819479660122
+    },
+    "death": {
+      "n": 5307,
+      "wins": 1029,
+      "losses": 4278,
+      "winRate": 19.38948558507631,
+      "avgProfit": 3.5055262260786813,
+      "avgLoss": -3.3598317227289067,
+      "profitFactor": 0.922738067914601,
+      "expectancy": -0.10746426183616602,
+      "avgReturnClose": 0.010119148190804854,
+      "medianReturnClose": 0,
+      "avgMfe": 3.2181291114158324,
+      "avgMae": -2.8655267281848764
+    }
+  },
+  "macdBucket": {
+    "bearish": {
+      "n": 6582,
+      "wins": 1333,
+      "losses": 5249,
+      "winRate": 20.252202977818293,
+      "avgProfit": 3.5788802573770817,
+      "avgLoss": -3.538247699958207,
+      "profitFactor": 0.9215909229430354,
+      "expectancy": -0.1128774707517476,
+      "avgReturnClose": -0.020779066204201738,
+      "medianReturnClose": 0,
+      "avgMfe": 3.1551054326522556,
+      "avgMae": -2.9640226482811336
+    },
+    "bullish": {
+      "n": 6807,
+      "wins": 1454,
+      "losses": 5353,
+      "winRate": 21.360364330835903,
+      "avgProfit": 3.6738151737321787,
+      "avgLoss": -3.692307163047492,
+      "profitFactor": 0.9227952972297854,
+      "expectancy": -0.11369874250276536,
+      "avgReturnClose": 0.010817167855304993,
+      "medianReturnClose": 0,
+      "avgMfe": 3.405631568883296,
+      "avgMae": -2.985727621831033
+    },
+    "flat": {
+      "n": 763,
+      "wins": 22,
+      "losses": 741,
+      "winRate": 2.8833551769331587,
+      "avgProfit": 2.4721752775113908,
+      "avgLoss": -2.468020178255163,
+      "profitFactor": 0.829350917668368,
+      "expectancy": -0.05133470538578378,
+      "avgReturnClose": -0.020031090624548904,
+      "medianReturnClose": 0,
+      "avgMfe": 0.6506835154235179,
+      "avgMae": -0.6135188759610192
+    }
+  },
+  "gapBucket": {
+    "Flat": {
+      "n": 7450,
+      "wins": 1191,
+      "losses": 6259,
+      "winRate": 15.986577181208053,
+      "avgProfit": 3.378795813917713,
+      "avgLoss": -3.128942498719553,
+      "profitFactor": 1.0027200106951992,
+      "expectancy": 0.0029427798912220297,
+      "avgReturnClose": 0.09301074602237024,
+      "medianReturnClose": 0,
+      "avgMfe": 2.601013893309796,
+      "avgMae": -2.3060842862611604
+    },
+    "Gap Up <5%": {
+      "n": 3846,
+      "wins": 833,
+      "losses": 3013,
+      "winRate": 21.658866354654187,
+      "avgProfit": 3.730659604100803,
+      "avgLoss": -3.482382324388589,
+      "profitFactor": 0.7324376092978042,
+      "expectancy": -0.4932533134547197,
+      "avgReturnClose": -0.4419876354938252,
+      "medianReturnClose": -0.9174311926605505,
+      "avgMfe": 3.5434515813040734,
+      "avgMae": -3.6264850378722655
+    },
+    "Gap Down": {
+      "n": 2087,
+      "wins": 660,
+      "losses": 1427,
+      "winRate": 31.624341159559176,
+      "avgProfit": 3.8575358506132473,
+      "avgLoss": -3.771460736846584,
+      "profitFactor": 1.8363157231380085,
+      "expectancy": 0.908305356955869,
+      "avgReturnClose": 1.314479688289473,
+      "medianReturnClose": 0,
+      "avgMfe": 4.596062710490863,
+      "avgMae": -2.4912376262538385
+    },
+    "Gap Up >5%": {
+      "n": 769,
+      "wins": 125,
+      "losses": 644,
+      "winRate": 16.25487646293888,
+      "avgProfit": 4.279377867528378,
+      "avgLoss": -8.471183050323114,
+      "profitFactor": 0.31827488490029504,
+      "expectancy": -2.0501690240875554,
+      "avgReturnClose": -2.359926912261457,
+      "medianReturnClose": 0,
+      "avgMfe": 2.402936808486465,
+      "avgMae": -5.167955241683168
+    }
+  },
+  "falseBreakoutStats": {
+    "count": 793,
+    "pctOfTotal": 5.603448275862069,
+    "avgNextDayReturn": -3.7753823713580084
+  },
+  "featureImportance": [
+    {
+      "feature": "gapPct",
+      "corrWithReturn": -0.20186264210810065,
+      "corrWithWin": -0.10678379675916616
+    },
+    {
+      "feature": "relativeVolume",
+      "corrWithReturn": -0.05474960582718821,
+      "corrWithWin": 0.08640775684800149
+    },
+    {
+      "feature": "rsi14",
+      "corrWithReturn": -0.02749743606944698,
+      "corrWithWin": -0.050222510118557516
+    },
+    {
+      "feature": "macdHistogram",
+      "corrWithReturn": -0.01609510613119434,
+      "corrWithWin": -0.023044000257443523
+    },
+    {
+      "feature": "emaSpreadPct",
+      "corrWithReturn": -0.013651378437025297,
+      "corrWithWin": 0.004072232177125985
+    },
+    {
+      "feature": "momentumScore",
+      "corrWithReturn": -0.00792012809382673,
+      "corrWithWin": 0.05847974472683674
+    },
+    {
+      "feature": "higherLow",
+      "corrWithReturn": -0.0074755812810446895,
+      "corrWithWin": 0.028742284852828474
+    },
+    {
+      "feature": "value",
+      "corrWithReturn": -0.007135807643846631,
+      "corrWithWin": 0.05222310779615726
+    },
+    {
+      "feature": "higherHigh",
+      "corrWithReturn": 0.0017596454780818625,
+      "corrWithWin": 0.057955576635518265
+    }
+  ],
+  "featureImportance3d": [
+    {
+      "feature": "gapPct",
+      "corrWithReturn": -0.057368719339574936
+    },
+    {
+      "feature": "momentumScore",
+      "corrWithReturn": 0.026222796076493617
+    },
+    {
+      "feature": "emaSpreadPct",
+      "corrWithReturn": -0.019046847693891384
+    },
+    {
+      "feature": "macdHistogram",
+      "corrWithReturn": -0.018714031942955844
+    },
+    {
+      "feature": "relativeVolume",
+      "corrWithReturn": -0.017281491359697837
+    },
+    {
+      "feature": "rsi14",
+      "corrWithReturn": -0.010535880009295989
+    },
+    {
+      "feature": "higherLow",
+      "corrWithReturn": 0.0039118432015457765
+    },
+    {
+      "feature": "value",
+      "corrWithReturn": -0.0032176582643622486
+    },
+    {
+      "feature": "higherHigh",
+      "corrWithReturn": -0.000074775903742596
+    }
+  ],
+  "featureImportance5d": [
+    {
+      "feature": "gapPct",
+      "corrWithReturn": -0.05488706405106424
+    },
+    {
+      "feature": "momentumScore",
+      "corrWithReturn": 0.03393650374665306
+    },
+    {
+      "feature": "macdHistogram",
+      "corrWithReturn": -0.031642465149298214
+    },
+    {
+      "feature": "emaSpreadPct",
+      "corrWithReturn": -0.019823399246081546
+    },
+    {
+      "feature": "higherLow",
+      "corrWithReturn": 0.014261028607151222
+    },
+    {
+      "feature": "rsi14",
+      "corrWithReturn": -0.011702329112824057
+    },
+    {
+      "feature": "value",
+      "corrWithReturn": -0.007855566628237092
+    },
+    {
+      "feature": "relativeVolume",
+      "corrWithReturn": 0.003789049576840261
+    },
+    {
+      "feature": "higherHigh",
+      "corrWithReturn": -0.0012354428640707603
+    }
+  ],
+  "momentumBucketReturn3d": {
+    "90-100": {
+      "n": 4261,
+      "avgReturn": 1.1719529597814866
+    },
+    "80-89": {
+      "n": 1836,
+      "avgReturn": 0.7431021632224457
+    },
+    "60-69": {
+      "n": 612,
+      "avgReturn": 0.37712800531208424
+    },
+    "<60": {
+      "n": 6860,
+      "avgReturn": 0.5317237165645631
+    },
+    "70-79": {
+      "n": 583,
+      "avgReturn": 0.4964359912124183
+    }
+  },
+  "momentumBucketReturn5d": {
+    "90-100": {
+      "n": 4261,
+      "avgReturn": 2.0423793648222617
+    },
+    "80-89": {
+      "n": 1836,
+      "avgReturn": 2.1102427207824035
+    },
+    "60-69": {
+      "n": 612,
+      "avgReturn": 1.1307852579165092
+    },
+    "<60": {
+      "n": 6860,
+      "avgReturn": 1.1313544919328
+    },
+    "70-79": {
+      "n": 583,
+      "avgReturn": 1.2236581231684087
+    }
+  },
+  "correlationMatrix": {
+    "momentumScore": {
+      "momentumScore": 1,
+      "rsi14": 0.4264122497059536,
+      "macdHistogram": 0.19035978287216546,
+      "emaSpreadPct": 0.48342080579542596,
+      "relativeVolume": 0.18400472280329838,
+      "gapPct": 0.048353298049753704,
+      "value": 0.05548762261775872,
+      "higherHigh": 0.3909887752644853,
+      "higherLow": 0.3561861078833739
+    },
+    "rsi14": {
+      "momentumScore": 0.4264122497059536,
+      "rsi14": 1,
+      "macdHistogram": 0.2193496486513251,
+      "emaSpreadPct": 0.46778982250958273,
+      "relativeVolume": 0.1682608637621396,
+      "gapPct": 0.07366645395495361,
+      "value": 0.01883770328015966,
+      "higherHigh": 0.10834671952290313,
+      "higherLow": 0.09760726162801485
+    },
+    "macdHistogram": {
+      "momentumScore": 0.19035978287216546,
+      "rsi14": 0.2193496486513251,
+      "macdHistogram": 1,
+      "emaSpreadPct": -0.027039564342925454,
+      "relativeVolume": 0.03757394573673212,
+      "gapPct": 0.0373162459366544,
+      "value": 0.06034142145507456,
+      "higherHigh": 0.09232681231557159,
+      "higherLow": 0.10127647719286613
+    },
+    "emaSpreadPct": {
+      "momentumScore": 0.48342080579542596,
+      "rsi14": 0.46778982250958273,
+      "macdHistogram": -0.027039564342925454,
+      "emaSpreadPct": 1,
+      "relativeVolume": 0.002368266555858475,
+      "gapPct": 0.002036121661645051,
+      "value": 0.04047488132671996,
+      "higherHigh": 0.1252042912366602,
+      "higherLow": 0.16676496643761943
+    },
+    "relativeVolume": {
+      "momentumScore": 0.18400472280329838,
+      "rsi14": 0.1682608637621396,
+      "macdHistogram": 0.03757394573673212,
+      "emaSpreadPct": 0.002368266555858475,
+      "relativeVolume": 1,
+      "gapPct": 0.08945935610378086,
+      "value": 0.07767718627844664,
+      "higherHigh": 0.014107676348591712,
+      "higherLow": 0.004699861440465546
+    },
+    "gapPct": {
+      "momentumScore": 0.048353298049753704,
+      "rsi14": 0.07366645395495361,
+      "macdHistogram": 0.0373162459366544,
+      "emaSpreadPct": 0.002036121661645051,
+      "relativeVolume": 0.08945935610378086,
+      "gapPct": 1,
+      "value": 0.0024957744015337395,
+      "higherHigh": 0.004692086689581712,
+      "higherLow": 0.011503364864165682
+    },
+    "value": {
+      "momentumScore": 0.05548762261775872,
+      "rsi14": 0.01883770328015966,
+      "macdHistogram": 0.06034142145507456,
+      "emaSpreadPct": 0.04047488132671996,
+      "relativeVolume": 0.07767718627844664,
+      "gapPct": 0.0024957744015337395,
+      "value": 1,
+      "higherHigh": 0.031006237665333548,
+      "higherLow": 0.04383738484088486
+    },
+    "higherHigh": {
+      "momentumScore": 0.3909887752644853,
+      "rsi14": 0.10834671952290313,
+      "macdHistogram": 0.09232681231557159,
+      "emaSpreadPct": 0.1252042912366602,
+      "relativeVolume": 0.014107676348591712,
+      "gapPct": 0.004692086689581712,
+      "value": 0.031006237665333548,
+      "higherHigh": 1,
+      "higherLow": 0.21797226495382502
+    },
+    "higherLow": {
+      "momentumScore": 0.3561861078833739,
+      "rsi14": 0.09760726162801485,
+      "macdHistogram": 0.10127647719286613,
+      "emaSpreadPct": 0.16676496643761943,
+      "relativeVolume": 0.004699861440465546,
+      "gapPct": 0.011503364864165682,
+      "value": 0.04383738484088486,
+      "higherHigh": 0.21797226495382502,
+      "higherLow": 1
+    }
+  },
+  "redundantPairs": []
+}
