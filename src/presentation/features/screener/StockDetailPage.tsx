@@ -319,99 +319,240 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
               </CardContent>
             </Card>
 
-            {/* Checklist Entry */}
-            <Card className="border-blue-200 bg-blue-50 mb-6">
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-blue-900 flex items-center">
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Checklist Sebelum Entry
-                </h3>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                      defaultChecked={stock.technical.volRatio > 1.5}
-                    />
-                    <label className="text-sm text-blue-900 font-medium">
-                      Volume &gt; 1.5x
-                      <span className="text-xs text-blue-700 ml-2">
-                        (Current: {stock.technical.volRatio.toFixed(2)}x)
-                      </span>
-                    </label>
+            {/* Checklist Entry & Checklist Setelah Market Close */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-blue-900 flex items-center">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Checklist Sebelum Entry
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        defaultChecked={stock.technical.volRatio > 1.5}
+                      />
+                      <label className="text-sm text-blue-900 font-medium">
+                        Volume &gt; 1.5x
+                        <span className="text-xs text-blue-700 ml-2">
+                          (Current: {stock.technical.volRatio.toFixed(2)}x)
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        defaultChecked={stock.percentChange >= 3 && stock.percentChange <= 8}
+                      />
+                      <label className="text-sm text-blue-900 font-medium">
+                        Naik 3–8%
+                        <span className="text-xs text-blue-700 ml-2">
+                          (Current: {stock.percentChange.toFixed(2)}%)
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        defaultChecked={stock.technical.rsi14 >= 55 && stock.technical.rsi14 <= 70}
+                      />
+                      <label className="text-sm text-blue-900 font-medium">
+                        RSI 55–70
+                        <span className="text-xs text-blue-700 ml-2">
+                          (Current: {stock.technical.rsi14})
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        defaultChecked={stock.lastClose > stock.technical.ema20}
+                      />
+                      <label className="text-sm text-blue-900 font-medium">
+                        Break Resistance
+                        <span className="text-xs text-blue-700 ml-2">
+                          (Above EMA20: {stock.technical.ema20.toLocaleString('id-ID')})
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <label className="text-sm text-blue-900 font-medium">
+                        Jam 09:15 – 10:30
+                        <span className="text-xs text-blue-700 ml-2">
+                          (Trading Window)
+                        </span>
+                      </label>
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                      defaultChecked={stock.percentChange >= 3 && stock.percentChange <= 8}
-                    />
-                    <label className="text-sm text-blue-900 font-medium">
-                      Naik 3–8%
-                      <span className="text-xs text-blue-700 ml-2">
-                        (Current: {stock.percentChange.toFixed(2)}%)
-                      </span>
-                    </label>
+
+                  <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-blue-900">Entry Signal:</span>
+                      <Badge variant="success" className="text-xs font-bold">
+                        ENTRY
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-blue-800 mt-1">
+                      Checklist terpenuhi? Siap untuk entry dengan risk management yang tepat
+                    </p>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                      defaultChecked={stock.technical.rsi14 >= 55 && stock.technical.rsi14 <= 70}
-                    />
-                    <label className="text-sm text-blue-900 font-medium">
-                      RSI 55–70
-                      <span className="text-xs text-blue-700 ml-2">
-                        (Current: {stock.technical.rsi14})
-                      </span>
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                      defaultChecked={stock.lastClose > stock.technical.ema20}
-                    />
-                    <label className="text-sm text-blue-900 font-medium">
-                      Break Resistance
-                      <span className="text-xs text-blue-700 ml-2">
-                        (Above EMA20: {stock.technical.ema20.toLocaleString('id-ID')})
-                      </span>
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <label className="text-sm text-blue-900 font-medium">
-                      Jam 09:15 – 10:30
-                      <span className="text-xs text-blue-700 ml-2">
-                        (Trading Window)
-                      </span>
-                    </label>
-                  </div>
-                </div>
-                
-                <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-blue-900">Entry Signal:</span>
-                    <Badge variant="success" className="text-xs font-bold">
-                      ENTRY
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-blue-800 mt-1">
-                    Checklist terpenuhi? Siap untuk entry dengan risk management yang tepat
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {(() => {
+                const closeToHigh = stock.highToday > 0 && stock.lastClose >= stock.highToday * 0.98;
+                const emaGolden = stock.technical.ema20 > stock.technical.ema50;
+                const macdBullish = stock.technical.macd > stock.technical.macdSignal;
+                const rsiInRange = stock.technical.rsi14 >= 60 && stock.technical.rsi14 <= 80;
+                const valueOk = stock.value > 20_000_000_000;
+                const rvolOk = stock.technical.volRatio > 2;
+                const breakoutOk = stock.lastClose > stock.technical.ema20;
+                const rrOk = stock.scalpingLevels.riskRewardRatio > 2;
+                const autoChecks = [valueOk, rvolOk, closeToHigh, breakoutOk, emaGolden, macdBullish, rsiInRange, rrOk];
+                const allAutoPassed = autoChecks.every(Boolean);
+
+                return (
+                  <Card className="border-indigo-200 bg-indigo-50">
+                    <CardHeader>
+                      <h3 className="text-lg font-semibold text-indigo-900 flex items-center">
+                        <Moon className="w-5 h-5 mr-2" />
+                        Checklist Setelah Market Close
+                      </h3>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={valueOk} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            Value &gt; Rp20 Miliar
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (Current: Rp{(stock.value / 1_000_000_000).toFixed(1)} M)
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={rvolOk} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            RVOL &gt; 2
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (Current: {stock.technical.volRatio.toFixed(2)}x)
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={closeToHigh} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            Close Dekat High
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (High: {stock.highToday.toLocaleString('id-ID')})
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={breakoutOk} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            Breakout Resistance
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (Above EMA20: {stock.technical.ema20.toLocaleString('id-ID')})
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={emaGolden} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            EMA Golden
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (EMA20 {emaGolden ? '>' : '<'} EMA50)
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={macdBullish} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            MACD Bullish
+                            <span className="text-xs text-indigo-700 ml-2">
+                              ({macdBullish ? 'Bullish' : 'Bearish'})
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={rsiInRange} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            RSI 60–80
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (Current: {stock.technical.rsi14})
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            Broker Net Buy
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (Data tidak tersedia, cek manual)
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            Tidak Gap Up Besar Hari Ini
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (Cek manual di jam 09:00)
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <input type="checkbox" className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" defaultChecked={rrOk} />
+                          <label className="text-sm text-indigo-900 font-medium">
+                            Risk Reward &gt; 1:2
+                            <span className="text-xs text-indigo-700 ml-2">
+                              (Current: 1:{stock.scalpingLevels.riskRewardRatio.toFixed(1)})
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 p-3 bg-indigo-100 rounded-lg border border-indigo-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-indigo-900">Watchlist Signal:</span>
+                          <Badge variant={allAutoPassed ? 'success' : 'neutral'} className="text-xs font-bold">
+                            {allAutoPassed ? 'WATCHLIST' : 'BELUM'}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-indigo-800 mt-1">
+                          Broker Net Buy &amp; Gap Up perlu verifikasi manual sebelum masuk watchlist besok
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+            </div>
 
           </div>
 

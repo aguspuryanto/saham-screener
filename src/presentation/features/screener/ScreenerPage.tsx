@@ -8,15 +8,16 @@ import { StockDetailPage } from './StockDetailPage';
 import { WatchlistSidebar } from './WatchlistSidebar';
 import { WatchlistTicker } from './WatchlistTicker';
 import { ScannerModeTab } from './ScannerModeTab';
+import { AiScreenerTab } from './AiScreenerTab';
 import {
   Search, SlidersHorizontal, RefreshCw, X,
-  Home, Star, TrendingUp, Zap, BarChart2
+  Home, Star, TrendingUp, Zap, BarChart2, Sparkles
 } from 'lucide-react';
 import { NotificationModal, NotificationSetting } from './NotificationModal';
 
 type SortField = 'ticker' | 'name' | 'price' | 'percentChange' | 'swingScore' | 'scalpingScore';
 type SortDirection = 'asc' | 'desc';
-type AppTab = 'screener' | 'swing' | 'scalping';
+type AppTab = 'screener' | 'swing' | 'scalping' | 'ai-screener';
 
 interface SortConfig {
   field: SortField;
@@ -225,6 +226,7 @@ export function ScreenerPage() {
     { id: 'screener', icon: <BarChart2 className="w-4 h-4" />, label: 'Screener', sublabel: 'Semua Saham' },
     { id: 'swing', icon: <TrendingUp className="w-4 h-4" />, label: 'Swing Trade', sublabel: '1–3 Hari' },
     { id: 'scalping', icon: <Zap className="w-4 h-4" />, label: 'Pre-Market', sublabel: 'Scalping' },
+    { id: 'ai-screener', icon: <Sparkles className="w-4 h-4" />, label: 'AI Screener', sublabel: 'Rule Engine' },
   ];
 
   return (
@@ -250,8 +252,8 @@ export function ScreenerPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
                   }`}
               >
                 {tab.icon}
@@ -360,8 +362,8 @@ export function ScreenerPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${activeTab === tab.id
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-white text-slate-600 border border-slate-200'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-white text-slate-600 border border-slate-200'
                 }`}
             >
               {tab.icon}
@@ -373,6 +375,17 @@ export function ScreenerPage() {
         {/* Swing / Scalping Scanner Mode */}
         {(activeTab === 'swing' || activeTab === 'scalping') && (
           <ScannerModeTab
+            stocks={stocks}
+            loading={loading}
+            onStockClick={handleStockClick}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
+          />
+        )}
+
+        {/* AI Screener Mode */}
+        {activeTab === 'ai-screener' && (
+          <AiScreenerTab
             stocks={stocks}
             loading={loading}
             onStockClick={handleStockClick}
@@ -451,8 +464,8 @@ export function ScreenerPage() {
                           setFilters({ ...filters, industry: newIndustries });
                         }}
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isSelected
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                           }`}
                       >
                         {industry.label}
