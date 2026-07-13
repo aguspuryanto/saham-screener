@@ -1,3 +1,12 @@
+export function formatRupiah(value: number): string {
+  return `Rp${Math.round(value).toLocaleString('id-ID')}`;
+}
+
+export function formatPercentSigned(value: number, digits = 1): string {
+  const sign = value >= 0 ? '+' : '';
+  return `${sign}${value.toFixed(digits)}%`;
+}
+
 export function formatCompactNumber(value: number): string {
   if (!value) return '-';
   const abs = Math.abs(value);

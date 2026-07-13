@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Semantic aliases over the app's existing slate/emerald/red/amber convention. */
+  --color-positive: var(--color-emerald-600);
+  --color-positive-soft: var(--color-emerald-50);
+  --color-negative: var(--color-red-500);
+  --color-negative-soft: var(--color-red-50);
+  --color-warning: var(--color-amber-500);
+  --color-warning-soft: var(--color-amber-50);
+  --color-neutral: var(--color-slate-500);
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

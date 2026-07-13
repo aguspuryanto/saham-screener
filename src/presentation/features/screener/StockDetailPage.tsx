@@ -31,11 +31,13 @@ import {
   Shield,
   TrendingDown as BearishIcon,
   ArrowUpRight as BullishIcon,
-  Moon
+  Moon,
+  Compass
 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import { AiEngineTab } from './AiEngineTab';
 import { AfterCloseScoreTab } from './AfterCloseScoreTab';
+import { DetailSummaryTab } from './DetailSummaryTab';
 
 interface StockDetailPageProps {
   stock: Stock;
@@ -46,7 +48,7 @@ interface StockDetailPageProps {
 }
 
 export function StockDetailPage({ stock, onBack, onSetNotification, hasNotification, allStocks }: StockDetailPageProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner' | 'aiengine' | 'afterclose'>('scanner');
+  const [activeTab, setActiveTab] = useState<'ringkasan' | 'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner' | 'aiengine' | 'afterclose'>('ringkasan');
   
   const isPositive = stock.percentChange >= 0;
 
@@ -164,6 +166,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
   const formatPercent = (value: number) => `${(value * 100).toFixed(2)}%`;
 
   const tabs = [
+    { id: 'ringkasan', label: 'Ringkasan', icon: <Compass className="w-4 h-4" /> },
     { id: 'scanner', label: 'S.C.A.N.', icon: <Target className="w-4 h-4" /> },
     { id: 'aiengine', label: 'AI Engine', icon: <Sparkles className="w-4 h-4" /> },
     { id: 'afterclose', label: 'After Close', icon: <Moon className="w-4 h-4" /> },
@@ -723,6 +726,8 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
 
         {/* Tab Content */}
         <div className="space-y-6">
+          {activeTab === 'ringkasan' && <DetailSummaryTab stock={stock} />}
+
           {activeTab === 'scanner' && (
             <div className="space-y-5">
               {/* Score cards */}
