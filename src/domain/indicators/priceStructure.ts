@@ -13,7 +13,7 @@ export function lowestLow(bars: OHLCVBar[], period = 20): number {
 }
 
 /** Swing high: a bar whose high is >= the high of `wing` bars on each side. */
-function findSwingHighs(bars: OHLCVBar[], wing = 2): { index: number; high: number }[] {
+export function findSwingHighs(bars: OHLCVBar[], wing = 2): { index: number; high: number }[] {
   const swings: { index: number; high: number }[] = [];
   for (let i = wing; i < bars.length - wing; i++) {
     const isSwing = Array.from({ length: wing }, (_, k) => k + 1).every(
@@ -24,7 +24,7 @@ function findSwingHighs(bars: OHLCVBar[], wing = 2): { index: number; high: numb
   return swings;
 }
 
-function findSwingLows(bars: OHLCVBar[], wing = 2): { index: number; low: number }[] {
+export function findSwingLows(bars: OHLCVBar[], wing = 2): { index: number; low: number }[] {
   const swings: { index: number; low: number }[] = [];
   for (let i = wing; i < bars.length - wing; i++) {
     const isSwing = Array.from({ length: wing }, (_, k) => k + 1).every(

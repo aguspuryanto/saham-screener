@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { Stock } from '../../../domain/models/Stock';
 import { computeAfterCloseScore, WATCHLIST_THRESHOLD } from '../../../domain/engine/afterCloseScore';
+import { computeTradeEngineOutput } from '../../../domain/engine/tradeEngine';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { Loader2, Moon, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, Moon, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import { useStockHistory } from './useStockHistory';
+import { TradeEngineCard } from './TradeEngineCard';
 
 interface AfterCloseScoreTabProps {
   stock: Stock;
@@ -32,6 +34,11 @@ export function AfterCloseScoreTab({ stock, allStocks = [] }: AfterCloseScoreTab
     if (!history.ok || history.bars.length === 0) return null;
     return computeAfterCloseScore(stock, history.bars, allStocks);
   }, [stock, allStocks, history.ok, history.bars]);
+
+  const tradeEngineOutput = useMemo(() => {
+    if (!history.ok || history.bars.length === 0) return null;
+    return computeTradeEngineOutput(stock, history.bars);
+  }, [stock, history.ok, history.bars]);
 
   if (history.loading) {
     return (
@@ -64,14 +71,32 @@ export function AfterCloseScoreTab({ stock, allStocks = [] }: AfterCloseScoreTab
     );
   }
 
+  const conflict = !!tradeEngineOutput && result.eligible && tradeEngineOutput.decision === 'NO_TRADE';
+
   return (
     <div className="space-y-6">
+      {tradeEngineOutput && <TradeEngineCard output={tradeEngineOutput} />}
+
+      {conflict && (
+        <Card className="border-2 border-red-300 bg-red-50/40">
+          <CardContent className="flex items-start gap-2 py-4 text-sm text-red-700">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>
+              Checklist di bawah menandai saham ini masuk watchlist (skor ≥{WATCHLIST_THRESHOLD}), tapi Trade Engine
+              di atas menilainya <strong>NO TRADE</strong> karena risiko/overextension. Checklist ini hanya mengukur
+              konfirmasi momentum — tidak memperhitungkan risiko chase seperti gap besar, RSI ekstrem, atau sinyal
+              false breakout. Ini adalah persis pola BKDP: skor konfirmasi tinggi tapi risiko chase juga tinggi.
+            </span>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className={cn('border-2', result.eligible ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-200')}>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Moon className="w-5 h-5 text-indigo-500" />
-              <CardTitle>After Close Score</CardTitle>
+              <CardTitle>After Close Score (legacy checklist)</CardTitle>
             </div>
             <p className="text-sm text-slate-500">
               Screening setelah market tutup (15.30–21.00) untuk watchlist eksekusi besok pagi.

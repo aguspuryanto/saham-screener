@@ -21,8 +21,10 @@ export interface IndicatorSnapshot {
   ema9: number;
   ema20: number;
   ema50: number;
+  ema100: number; // NaN if fewer than 100 bars available
   prevEma9: number;
   prevEma20: number;
+  prevEma100: number;
 
   ma20: number;
   ma50: number;
@@ -78,6 +80,7 @@ export function computeIndicatorSnapshot(bars: OHLCVBar[]): IndicatorSnapshot | 
   const ema9Series = ema(priceCloses, 9);
   const ema20Series = ema(priceCloses, 20);
   const ema50Series = ema(priceCloses, 50);
+  const ema100Series = ema(priceCloses, 100);
   const ma20Series = sma(priceCloses, 20);
   const ma50Series = sma(priceCloses, 50);
   const rsiSeries = rsi(bars, 14);
@@ -105,8 +108,10 @@ export function computeIndicatorSnapshot(bars: OHLCVBar[]): IndicatorSnapshot | 
     ema9: lastValid(ema9Series),
     ema20: lastValid(ema20Series),
     ema50: lastValid(ema50Series),
+    ema100: lastValid(ema100Series),
     prevEma9: valueAt(ema9Series, 1),
     prevEma20: valueAt(ema20Series, 1),
+    prevEma100: valueAt(ema100Series, 1),
 
     ma20: lastValid(ma20Series),
     ma50: lastValid(ma50Series),

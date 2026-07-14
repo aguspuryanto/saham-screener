@@ -3,6 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { getDb } from "./server/db.js";
 import { registerHistoryRoutes } from "./server/historyRoutes.js";
+import { registerTradeJournalRoutes } from "./server/tradeJournalRoutes.js";
 
 async function startServer() {
   const app = express();
@@ -16,6 +17,8 @@ async function startServer() {
     next();
   });
 
+  app.use(express.json());
+
   // API routes FIRST
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
@@ -23,6 +26,7 @@ async function startServer() {
 
   const db = getDb();
   registerHistoryRoutes(app, db);
+  registerTradeJournalRoutes(app, db);
 
   app.get("/api/stocks", async (req, res) => {
     try {

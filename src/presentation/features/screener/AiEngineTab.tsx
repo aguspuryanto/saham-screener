@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import { Stock } from '../../../domain/models/Stock';
 import { computeAiEngineOutput } from '../../../domain/engine/aiEngine';
+import { computeTradeEngineOutput } from '../../../domain/engine/tradeEngine';
 import { AiScores } from '../../../domain/models/AiEngine';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useStockHistory } from './useStockHistory';
 import { recommendationBadgeVariant, ScoreBar } from './aiEngineUi';
+import { TradeEngineCard } from './TradeEngineCard';
 
 interface AiEngineTabProps {
   stock: Stock;
@@ -37,6 +39,11 @@ export function AiEngineTab({ stock }: AiEngineTabProps) {
   const output = useMemo(() => {
     if (!history.ok || history.bars.length === 0) return null;
     return computeAiEngineOutput(stock, history.bars);
+  }, [stock, history.ok, history.bars]);
+
+  const tradeEngineOutput = useMemo(() => {
+    if (!history.ok || history.bars.length === 0) return null;
+    return computeTradeEngineOutput(stock, history.bars);
   }, [stock, history.ok, history.bars]);
 
   if (history.loading) {
@@ -72,12 +79,14 @@ export function AiEngineTab({ stock }: AiEngineTabProps) {
 
   return (
     <div className="space-y-6">
+      {tradeEngineOutput && <TradeEngineCard output={tradeEngineOutput} />}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Sparkles className="w-5 h-5 text-indigo-500" />
-              <CardTitle>AI Engine — {output.strategy}</CardTitle>
+              <CardTitle>AI Engine (legacy) — {output.strategy}</CardTitle>
             </div>
             <p className="text-sm text-slate-500">Trend: {output.trend_category}</p>
           </div>

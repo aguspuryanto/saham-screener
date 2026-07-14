@@ -9,6 +9,8 @@ import { WatchlistSidebar } from './WatchlistSidebar';
 import { WatchlistTicker } from './WatchlistTicker';
 import { ScannerModeTab } from './ScannerModeTab';
 import { AiScreenerTab } from './AiScreenerTab';
+import { WatchlistAiTab } from './WatchlistAiTab';
+import { TradeJournalTab } from './TradeJournalTab';
 import { HeroSummary } from './HeroSummary';
 import { QuickFilterChips, QuickFilterKey } from './QuickFilterChips';
 import { SkeletonStockGrid } from './SkeletonStockCard';
@@ -16,13 +18,13 @@ import { EmptyState } from './EmptyState';
 import { isBlueChip, isLowRisk } from '../../../utils/stockLabels';
 import {
   Search, SlidersHorizontal, RefreshCw, X,
-  Home, Star, TrendingUp, Zap, BarChart2, Sparkles, LayoutGrid, Table2
+  Home, Star, TrendingUp, Zap, BarChart2, Sparkles, LayoutGrid, Table2, ListChecks, BookOpen
 } from 'lucide-react';
 import { NotificationModal, NotificationSetting } from './NotificationModal';
 
 type SortField = 'ticker' | 'name' | 'price' | 'percentChange' | 'swingScore' | 'scalpingScore';
 type SortDirection = 'asc' | 'desc';
-type AppTab = 'screener' | 'swing' | 'scalping' | 'ai-screener';
+type AppTab = 'screener' | 'swing' | 'scalping' | 'ai-screener' | 'watchlist-ai' | 'journal';
 type ViewMode = 'card' | 'table';
 
 interface SortConfig {
@@ -241,6 +243,8 @@ export function ScreenerPage() {
     { id: 'swing', icon: <TrendingUp className="w-4 h-4" />, label: 'Swing Trade', sublabel: '1–3 Hari' },
     { id: 'scalping', icon: <Zap className="w-4 h-4" />, label: 'Pre-Market', sublabel: 'Scalping' },
     { id: 'ai-screener', icon: <Sparkles className="w-4 h-4" />, label: 'AI Screener', sublabel: 'Rule Engine' },
+    { id: 'watchlist-ai', icon: <ListChecks className="w-4 h-4" />, label: 'Watchlist AI', sublabel: 'After Market' },
+    { id: 'journal', icon: <BookOpen className="w-4 h-4" />, label: 'Journal', sublabel: 'Catat Hasil' },
   ];
 
   return (
@@ -407,6 +411,20 @@ export function ScreenerPage() {
             favorites={favorites}
           />
         )}
+
+        {/* Watchlist AI Mode (Stage 1 — After Market AI) */}
+        {activeTab === 'watchlist-ai' && (
+          <WatchlistAiTab
+            stocks={stocks}
+            loading={loading}
+            onStockClick={handleStockClick}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
+          />
+        )}
+
+        {/* Trade Journal */}
+        {activeTab === 'journal' && <TradeJournalTab />}
 
         {/* Screener Mode */}
         {activeTab === 'screener' && (

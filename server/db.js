@@ -28,6 +28,24 @@ CREATE TABLE IF NOT EXISTS history_fetch_log (
   bar_count        INTEGER NOT NULL DEFAULT 0,
   last_error       TEXT
 );
+
+CREATE TABLE IF NOT EXISTS trade_journal (
+  id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticker                    TEXT NOT NULL,
+  logged_at                 TEXT NOT NULL,
+  watchlist_score           REAL,
+  watchlist_tier            TEXT,
+  entry_price               REAL,
+  exit_price                REAL,
+  stop_loss                 REAL,
+  take_profit               REAL,
+  result_pct                REAL,
+  max_drawdown_pct          REAL,
+  max_profit_intraday_pct   REAL,
+  entry_reason              TEXT,
+  exit_reason               TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_trade_journal_ticker ON trade_journal(ticker);
 `;
 
 function resolveDbPath() {

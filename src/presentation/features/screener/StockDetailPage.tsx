@@ -32,11 +32,13 @@ import {
   TrendingDown as BearishIcon,
   ArrowUpRight as BullishIcon,
   Moon,
-  Compass
+  Compass,
+  Waypoints
 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import { AiEngineTab } from './AiEngineTab';
 import { AfterCloseScoreTab } from './AfterCloseScoreTab';
+import { TradePipelineTab } from './TradePipelineTab';
 import { DetailSummaryTab } from './DetailSummaryTab';
 
 interface StockDetailPageProps {
@@ -48,7 +50,7 @@ interface StockDetailPageProps {
 }
 
 export function StockDetailPage({ stock, onBack, onSetNotification, hasNotification, allStocks }: StockDetailPageProps) {
-  const [activeTab, setActiveTab] = useState<'ringkasan' | 'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner' | 'aiengine' | 'afterclose'>('ringkasan');
+  const [activeTab, setActiveTab] = useState<'ringkasan' | 'overview' | 'technical' | 'fundamental' | 'trading' | 'scanner' | 'aiengine' | 'afterclose' | 'pipeline'>('ringkasan');
   
   const isPositive = stock.percentChange >= 0;
 
@@ -170,6 +172,7 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
     { id: 'scanner', label: 'S.C.A.N.', icon: <Target className="w-4 h-4" /> },
     { id: 'aiengine', label: 'AI Engine', icon: <Sparkles className="w-4 h-4" /> },
     { id: 'afterclose', label: 'After Close', icon: <Moon className="w-4 h-4" /> },
+    { id: 'pipeline', label: 'Pipeline', icon: <Waypoints className="w-4 h-4" /> },
     { id: 'trading', label: 'Trading Analysis', icon: <Zap className="w-4 h-4" /> },
     { id: 'overview', label: 'Overview', icon: <Info className="w-4 h-4" /> },
     { id: 'technical', label: 'Technical', icon: <BarChart2 className="w-4 h-4" /> },
@@ -1758,6 +1761,8 @@ export function StockDetailPage({ stock, onBack, onSetNotification, hasNotificat
           {activeTab === 'aiengine' && <AiEngineTab stock={stock} />}
 
           {activeTab === 'afterclose' && <AfterCloseScoreTab stock={stock} allStocks={allStocks} />}
+
+          {activeTab === 'pipeline' && <TradePipelineTab stock={stock} />}
 
         </div>
       </div>
