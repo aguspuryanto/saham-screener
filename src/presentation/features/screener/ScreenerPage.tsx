@@ -55,7 +55,7 @@ export function ScreenerPage() {
 
   const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS);
   const [activeQuickFilter, setActiveQuickFilter] = useState<QuickFilterKey>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>('card');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [mobileNavTab, setMobileNavTab] = useState<'results' | 'filters' | 'watchlist'>('results');
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const watchlistRef = useRef<HTMLDivElement | null>(null);
@@ -429,7 +429,7 @@ export function ScreenerPage() {
         {/* Screener Mode */}
         {activeTab === 'screener' && (
           <div>
-            <HeroSummary stocks={stocks} />
+            {/* <HeroSummary stocks={filteredStocks} /> */}
 
             <div className="mb-5 flex flex-col sm:flex-row sm:items-center gap-3">
               <QuickFilterChips
@@ -438,114 +438,114 @@ export function ScreenerPage() {
               />
             </div>
 
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Sidebar */}
-            <div className="hidden lg:block w-64 shrink-0">
-              <FilterSidebar filters={filters} onChange={setFilters} stocks={stocks} />
-              <div className="mt-5">
-                <WatchlistSidebar
-                  favorites={getFavoriteStocks()}
-                  onRemoveFavorite={(stockId) => { const stock = stocks.find(s => s.id === stockId); if (stock) handleToggleFavorite(stock); }}
-                  onStockClick={handleStockClick}
-                  onToggleFavorite={handleToggleFavorite}
-                />
-              </div>
-            </div>
-
-            {/* Results */}
-            <div className="flex-1 min-w-0">
-              <div ref={resultsRef} className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-50">Hasil Screening</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {filteredStocks.length} saham ditemukan
-                    {stocks.length > 0 && ` dari ${stocks.length} total`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
-                    <button
-                      onClick={() => setViewMode('card')}
-                      className={`p-1.5 rounded-md transition-colors ${viewMode === 'card' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-slate-50' : 'text-slate-400'}`}
-                      title="Tampilan Kartu"
-                    >
-                      <LayoutGrid className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('table')}
-                      className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-slate-50' : 'text-slate-400'}`}
-                      title="Tampilan Tabel"
-                    >
-                      <Table2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <select
-                    className="text-sm border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-lg py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white"
-                    value={`${sortConfig.field}-${sortConfig.direction}`}
-                    onChange={(e) => {
-                      const [field, direction] = e.target.value.split('-');
-                      setSortConfig({ field: field as SortField, direction: direction as SortDirection });
-                    }}
-                  >
-                    <option value="swingScore-desc">AI Score (Tertinggi)</option>
-                    <option value="scalpingScore-desc">Scalping Score (Tertinggi)</option>
-                    <option value="percentChange-desc">Perubahan (Tertinggi)</option>
-                    <option value="percentChange-asc">Perubahan (Terendah)</option>
-                    <option value="price-desc">Harga (Tertinggi)</option>
-                    <option value="price-asc">Harga (Terendah)</option>
-                    <option value="ticker-asc">Ticker (A-Z)</option>
-                  </select>
-                </div>
-              </div>
-
-              {loading ? (
-                <SkeletonStockGrid count={6} />
-              ) : filteredStocks.length > 0 ? (
-                viewMode === 'card' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {filteredStocks.map((stock, index) => (
-                      <StockCard
-                        key={stock.id}
-                        stock={stock}
-                        index={index}
-                        onClick={handleStockClick}
-                        onSetNotification={setSelectedStockForNotification}
-                        hasNotification={!!notifications[stock.id]}
-                        onToggleFavorite={handleToggleFavorite}
-                        isFavorite={favorites.has(stock.id)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <StockListView
-                    stocks={filteredStocks}
-                    onClick={handleStockClick}
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Sidebar */}
+              <div className="hidden lg:block w-64 shrink-0">
+                <FilterSidebar filters={filters} onChange={setFilters} stocks={stocks} />
+                <div className="mt-5">
+                  <WatchlistSidebar
+                    favorites={getFavoriteStocks()}
+                    onRemoveFavorite={(stockId) => { const stock = stocks.find(s => s.id === stockId); if (stock) handleToggleFavorite(stock); }}
+                    onStockClick={handleStockClick}
                     onToggleFavorite={handleToggleFavorite}
-                    favorites={favorites}
-                    sortField={sortConfig.field}
-                    sortDirection={sortConfig.direction}
-                    onSortChange={(field) => {
-                      setSortConfig((prev: SortConfig) => ({
-                        field,
-                        direction: prev.field === field && prev.direction === 'desc' ? 'asc' : 'desc',
-                      }));
-                    }}
                   />
-                )
-              ) : (
-                <EmptyState onReset={() => { setFilters(DEFAULT_FILTERS); setActiveQuickFilter('all'); }} />
-              )}
+                </div>
+              </div>
 
-              <div ref={watchlistRef} className="lg:hidden mt-6">
-                <WatchlistSidebar
-                  favorites={getFavoriteStocks()}
-                  onRemoveFavorite={(stockId) => { const stock = stocks.find(s => s.id === stockId); if (stock) handleToggleFavorite(stock); }}
-                  onStockClick={handleStockClick}
-                  onToggleFavorite={handleToggleFavorite}
-                />
+              {/* Results */}
+              <div className="flex-1 min-w-0">
+                <div ref={resultsRef} className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-50">Hasil Screening</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {filteredStocks.length} saham ditemukan
+                      {stocks.length > 0 && ` dari ${stocks.length} total`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
+                      <button
+                        onClick={() => setViewMode('card')}
+                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'card' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-slate-50' : 'text-slate-400'}`}
+                        title="Tampilan Kartu"
+                      >
+                        <LayoutGrid className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setViewMode('table')}
+                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-slate-50' : 'text-slate-400'}`}
+                        title="Tampilan Tabel"
+                      >
+                        <Table2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <select
+                      className="text-sm border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-lg py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white"
+                      value={`${sortConfig.field}-${sortConfig.direction}`}
+                      onChange={(e) => {
+                        const [field, direction] = e.target.value.split('-');
+                        setSortConfig({ field: field as SortField, direction: direction as SortDirection });
+                      }}
+                    >
+                      <option value="swingScore-desc">AI Score (Tertinggi)</option>
+                      <option value="scalpingScore-desc">Scalping Score (Tertinggi)</option>
+                      <option value="percentChange-desc">Perubahan (Tertinggi)</option>
+                      <option value="percentChange-asc">Perubahan (Terendah)</option>
+                      <option value="price-desc">Harga (Tertinggi)</option>
+                      <option value="price-asc">Harga (Terendah)</option>
+                      <option value="ticker-asc">Ticker (A-Z)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {loading ? (
+                  <SkeletonStockGrid count={6} />
+                ) : filteredStocks.length > 0 ? (
+                  viewMode === 'card' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {filteredStocks.map((stock, index) => (
+                        <StockCard
+                          key={stock.id}
+                          stock={stock}
+                          index={index}
+                          onClick={handleStockClick}
+                          onSetNotification={setSelectedStockForNotification}
+                          hasNotification={!!notifications[stock.id]}
+                          onToggleFavorite={handleToggleFavorite}
+                          isFavorite={favorites.has(stock.id)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <StockListView
+                      stocks={filteredStocks}
+                      onClick={handleStockClick}
+                      onToggleFavorite={handleToggleFavorite}
+                      favorites={favorites}
+                      sortField={sortConfig.field}
+                      sortDirection={sortConfig.direction}
+                      onSortChange={(field) => {
+                        setSortConfig((prev: SortConfig) => ({
+                          field,
+                          direction: prev.field === field && prev.direction === 'desc' ? 'asc' : 'desc',
+                        }));
+                      }}
+                    />
+                  )
+                ) : (
+                  <EmptyState onReset={() => { setFilters(DEFAULT_FILTERS); setActiveQuickFilter('all'); }} />
+                )}
+
+                <div ref={watchlistRef} className="lg:hidden mt-6">
+                  <WatchlistSidebar
+                    favorites={getFavoriteStocks()}
+                    onRemoveFavorite={(stockId) => { const stock = stocks.find(s => s.id === stockId); if (stock) handleToggleFavorite(stock); }}
+                    onStockClick={handleStockClick}
+                    onToggleFavorite={handleToggleFavorite}
+                  />
+                </div>
               </div>
             </div>
-          </div>
           </div>
         )}
       </main>
