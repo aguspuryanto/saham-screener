@@ -258,8 +258,7 @@ export function ScreenerPage() {
               <span className="text-white font-black text-sm tracking-tighter">SC</span>
             </div>
             <div className="hidden sm:block">
-              <div className="text-sm font-black text-slate-900 leading-none">EZYSAHAM S.C.A.N.</div>
-              <div className="text-xs text-slate-400">Smart Capital Analysis Navigator</div>
+              <div className="text-sm font-black text-slate-900 leading-none">EZYSAHAM</div>
             </div>
           </div>
 
