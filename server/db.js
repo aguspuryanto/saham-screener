@@ -48,6 +48,20 @@ CREATE TABLE IF NOT EXISTS trade_journal (
 CREATE INDEX IF NOT EXISTS idx_trade_journal_ticker ON trade_journal(ticker);
 `;
 
+function ensureColumn(db, table, column, definition) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all();
+  const exists = columns.some((c) => c.name === column);
+  if (!exists) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+function runMigrations(db) {
+  db.exec(MIGRATIONS_SQL);
+  ensureColumn(db, 'trade_journal', 'entry_date', 'TEXT');
+  ensureColumn(db, 'trade_journal', 'exit_date', 'TEXT');
+}
+
 function resolveDbPath() {
   const override = process.env.SQLITE_DB_PATH;
   if (override) return override;
@@ -61,7 +75,7 @@ function getDb() {
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
   dbInstance = new Database(dbPath);
-  dbInstance.exec(MIGRATIONS_SQL);
+  runMigrations(dbInstance);
 
   return dbInstance;
 }

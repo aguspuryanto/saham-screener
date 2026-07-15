@@ -1,16 +1,37 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { TradeJournalEntry } from '../../../domain/models/TradeJournal';
+import { WatchlistTier } from '../../../domain/models/Watchlist';
 import { fetchJournalEntries, createJournalEntry } from '../../../data/repositories/TradeJournalRepository';
+import { computeHistoricalWatchlistScore } from '../../../domain/engine/watchlistLookup';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { BookOpen, Loader2, Info } from 'lucide-react';
+import { BookOpen, Loader2, Info, RefreshCw } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 
 const inputClass = 'w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500';
 const labelClass = 'block text-sm font-medium text-slate-700 mb-1';
 
+const TIER_LABEL: Record<WatchlistTier, string> = {
+  ELITE: 'Elite Watchlist',
+  VERY_GOOD: 'Very Good',
+  WORTH_WATCHING: 'Worth Watching',
+  NO_TRADE: 'No Trade',
+};
+
+function tierBadgeVariant(tier: WatchlistTier): 'success' | 'warning' | 'danger' {
+  if (tier === 'ELITE' || tier === 'VERY_GOOD') return 'success';
+  if (tier === 'WORTH_WATCHING') return 'warning';
+  return 'danger';
+}
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 const EMPTY_FORM: TradeJournalEntry = {
   ticker: '',
+  entryDate: todayIso(),
+  exitDate: '',
   watchlistScore: null,
   watchlistTier: '',
   entryPrice: null,
@@ -30,11 +51,14 @@ function toNumberOrNull(value: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+type ScoreStatus = 'idle' | 'loading' | 'done' | 'error';
+
 export function TradeJournalTab() {
   const [entries, setEntries] = useState<TradeJournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<TradeJournalEntry>(EMPTY_FORM);
+  const [scoreStatus, setScoreStatus] = useState<ScoreStatus>('idle');
 
   useEffect(() => {
     fetchJournalEntries().then((data) => {
@@ -42,6 +66,32 @@ export function TradeJournalTab() {
       setLoading(false);
     });
   }, []);
+
+  const updateForm = (patch: Partial<TradeJournalEntry>) => {
+    setForm((prev) => {
+      const next = { ...prev, ...patch };
+      if (next.entryPrice != null && next.exitPrice != null && next.entryPrice !== 0) {
+        next.resultPct = Number((((next.exitPrice - next.entryPrice) / next.entryPrice) * 100).toFixed(2));
+      }
+      return next;
+    });
+  };
+
+  const runScoreLookup = async () => {
+    const ticker = form.ticker.trim().toUpperCase();
+    if (!ticker) return;
+
+    setScoreStatus('loading');
+    const output = await computeHistoricalWatchlistScore(ticker, form.entryDate || todayIso());
+
+    if (output) {
+      setForm((prev) => ({ ...prev, watchlistScore: output.finalScore, watchlistTier: output.tier }));
+      setScoreStatus('done');
+    } else {
+      setForm((prev) => ({ ...prev, watchlistScore: null, watchlistTier: '' }));
+      setScoreStatus('error');
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -53,7 +103,8 @@ export function TradeJournalTab() {
 
     if (saved) {
       setEntries((prev) => [saved, ...prev]);
-      setForm(EMPTY_FORM);
+      setForm({ ...EMPTY_FORM, entryDate: todayIso() });
+      setScoreStatus('idle');
     }
   };
 
@@ -82,32 +133,56 @@ export function TradeJournalTab() {
                 className={inputClass}
                 value={form.ticker}
                 onChange={(e) => setForm({ ...form, ticker: e.target.value.toUpperCase() })}
+                onBlur={runScoreLookup}
                 placeholder="BKDP"
                 required
               />
             </div>
             <div>
-              <label className={labelClass}>Watchlist Score</label>
+              <label className={labelClass}>Tanggal Entry</label>
               <input
-                type="number"
+                type="date"
                 className={inputClass}
-                value={form.watchlistScore ?? ''}
-                onChange={(e) => setForm({ ...form, watchlistScore: toNumberOrNull(e.target.value) })}
+                value={form.entryDate ?? ''}
+                onChange={(e) => setForm({ ...form, entryDate: e.target.value })}
+                onBlur={runScoreLookup}
               />
             </div>
             <div>
-              <label className={labelClass}>Watchlist Tier</label>
-              <select
+              <label className={labelClass}>Tanggal Exit</label>
+              <input
+                type="date"
                 className={inputClass}
-                value={form.watchlistTier ?? ''}
-                onChange={(e) => setForm({ ...form, watchlistTier: e.target.value })}
-              >
-                <option value="">-</option>
-                <option value="ELITE">Elite Watchlist</option>
-                <option value="VERY_GOOD">Very Good</option>
-                <option value="WORTH_WATCHING">Worth Watching</option>
-                <option value="NO_TRADE">No Trade</option>
-              </select>
+                value={form.exitDate ?? ''}
+                onChange={(e) => setForm({ ...form, exitDate: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Watchlist Score (AI Engine)</label>
+              <div className="flex items-center gap-2 h-[38px]">
+                {scoreStatus === 'loading' ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+                ) : scoreStatus === 'done' && form.watchlistScore != null && form.watchlistTier ? (
+                  <>
+                    <span className="font-semibold text-slate-900">{form.watchlistScore}</span>
+                    <Badge variant={tierBadgeVariant(form.watchlistTier as WatchlistTier)}>
+                      {TIER_LABEL[form.watchlistTier as WatchlistTier] ?? form.watchlistTier}
+                    </Badge>
+                  </>
+                ) : scoreStatus === 'error' ? (
+                  <span className="text-xs text-slate-400">Data historis tidak cukup</span>
+                ) : (
+                  <span className="text-xs text-slate-400">Isi ticker untuk menghitung</span>
+                )}
+                <button
+                  type="button"
+                  onClick={runScoreLookup}
+                  className="ml-auto text-slate-400 hover:text-emerald-600"
+                  title="Hitung ulang"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
             <div>
               <label className={labelClass}>Entry Price</label>
@@ -115,7 +190,7 @@ export function TradeJournalTab() {
                 type="number"
                 className={inputClass}
                 value={form.entryPrice ?? ''}
-                onChange={(e) => setForm({ ...form, entryPrice: toNumberOrNull(e.target.value) })}
+                onChange={(e) => updateForm({ entryPrice: toNumberOrNull(e.target.value) })}
               />
             </div>
             <div>
@@ -124,7 +199,7 @@ export function TradeJournalTab() {
                 type="number"
                 className={inputClass}
                 value={form.exitPrice ?? ''}
-                onChange={(e) => setForm({ ...form, exitPrice: toNumberOrNull(e.target.value) })}
+                onChange={(e) => updateForm({ exitPrice: toNumberOrNull(e.target.value) })}
               />
             </div>
             <div>
@@ -220,7 +295,8 @@ export function TradeJournalTab() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-slate-500 border-b border-slate-100">
-                    <th className="py-2 pr-3">Tanggal</th>
+                    <th className="py-2 pr-3">Tgl Entry</th>
+                    <th className="py-2 pr-3">Tgl Exit</th>
                     <th className="py-2 pr-3">Ticker</th>
                     <th className="py-2 pr-3">Tier</th>
                     <th className="py-2 pr-3">Entry</th>
@@ -233,7 +309,10 @@ export function TradeJournalTab() {
                   {entries.map((e) => (
                     <tr key={e.id} className="border-b border-slate-50">
                       <td className="py-2 pr-3 whitespace-nowrap text-slate-500">
-                        {e.loggedAt ? new Date(e.loggedAt).toLocaleDateString('id-ID') : '-'}
+                        {e.entryDate ? new Date(e.entryDate).toLocaleDateString('id-ID') : (e.loggedAt ? new Date(e.loggedAt).toLocaleDateString('id-ID') : '-')}
+                      </td>
+                      <td className="py-2 pr-3 whitespace-nowrap text-slate-500">
+                        {e.exitDate ? new Date(e.exitDate).toLocaleDateString('id-ID') : '-'}
                       </td>
                       <td className="py-2 pr-3 font-semibold text-slate-900">{e.ticker}</td>
                       <td className="py-2 pr-3">{e.watchlistTier && <Badge variant="neutral">{e.watchlistTier}</Badge>}</td>

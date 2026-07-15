@@ -2,6 +2,8 @@ export interface TradeJournalEntry {
   id?: number;
   ticker: string;
   loggedAt?: string;
+  entryDate?: string | null;
+  exitDate?: string | null;
   watchlistScore?: number | null;
   watchlistTier?: string | null;
   entryPrice?: number | null;

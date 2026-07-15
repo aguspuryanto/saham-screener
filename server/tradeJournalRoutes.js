@@ -2,6 +2,8 @@ const SELECT_CAMELCASE = `
   SELECT
     id, ticker,
     logged_at AS loggedAt,
+    entry_date AS entryDate,
+    exit_date AS exitDate,
     watchlist_score AS watchlistScore,
     watchlist_tier AS watchlistTier,
     entry_price AS entryPrice,
@@ -23,12 +25,12 @@ function listEntries(db) {
 function insertEntry(db, entry) {
   const insert = db.prepare(`
     INSERT INTO trade_journal (
-      ticker, logged_at, watchlist_score, watchlist_tier,
+      ticker, logged_at, entry_date, exit_date, watchlist_score, watchlist_tier,
       entry_price, exit_price, stop_loss, take_profit,
       result_pct, max_drawdown_pct, max_profit_intraday_pct,
       entry_reason, exit_reason
     ) VALUES (
-      @ticker, @loggedAt, @watchlistScore, @watchlistTier,
+      @ticker, @loggedAt, @entryDate, @exitDate, @watchlistScore, @watchlistTier,
       @entryPrice, @exitPrice, @stopLoss, @takeProfit,
       @resultPct, @maxDrawdownPct, @maxProfitIntradayPct,
       @entryReason, @exitReason
@@ -54,6 +56,8 @@ function registerTradeJournalRoutes(app, db) {
     const entry = {
       ticker,
       loggedAt: new Date().toISOString(),
+      entryDate: body.entryDate || new Date().toISOString().slice(0, 10),
+      exitDate: body.exitDate ?? null,
       watchlistScore: body.watchlistScore ?? null,
       watchlistTier: body.watchlistTier ?? null,
       entryPrice: body.entryPrice ?? null,
