@@ -1,3 +1,10 @@
+## Trade Journal (`/api/journal`)
+
+`api/journal.js` handles `GET`/`POST /api/journal` in production (mirrors `server/tradeJournalRoutes.js`
+used locally). Since Vercel functions have no persistent disk, it stores entries in Turso (libSQL)
+instead of the local `better-sqlite3` file. Requires `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`
+env vars set in the Vercel project (Production + Preview) — see `api/_lib/turso.js`.
+
 ## Api Daily Closing Price: 
 ```
 https://pasardana.id/api/StockData/GetStockDailyClosingPrice?code=ADES&username=anonymous

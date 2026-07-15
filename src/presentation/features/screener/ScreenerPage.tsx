@@ -206,7 +206,7 @@ export function ScreenerPage() {
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
 
-    setFilteredStocks(result);
+    setFilteredStocks(result.slice(0, 50));
   }, [stocks, filters, sortConfig]);
 
   const handleSaveNotification = (setting: NotificationSetting) => {
@@ -241,8 +241,8 @@ export function ScreenerPage() {
   const tabConfig: { id: AppTab; icon: React.ReactNode; label: string; sublabel: string }[] = [
     { id: 'screener', icon: <BarChart2 className="w-4 h-4" />, label: 'Screener', sublabel: 'Semua Saham' },
     { id: 'swing', icon: <TrendingUp className="w-4 h-4" />, label: 'Swing Trade', sublabel: '1–3 Hari' },
-    { id: 'scalping', icon: <Zap className="w-4 h-4" />, label: 'Pre-Market', sublabel: 'Scalping' },
-    { id: 'ai-screener', icon: <Sparkles className="w-4 h-4" />, label: 'AI Screener', sublabel: 'Rule Engine' },
+    // { id: 'scalping', icon: <Zap className="w-4 h-4" />, label: 'Pre-Market', sublabel: 'Scalping' },
+    // { id: 'ai-screener', icon: <Sparkles className="w-4 h-4" />, label: 'AI Screener', sublabel: 'Rule Engine' },
     { id: 'watchlist-ai', icon: <ListChecks className="w-4 h-4" />, label: 'Watchlist AI', sublabel: 'After Market' },
     { id: 'journal', icon: <BookOpen className="w-4 h-4" />, label: 'Journal', sublabel: 'Catat Hasil' },
   ];
