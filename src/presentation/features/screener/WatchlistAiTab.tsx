@@ -4,6 +4,7 @@ import { WatchlistOutput, WatchlistTier } from '../../../domain/models/Watchlist
 import { cn } from '../../../utils/cn';
 import { Badge } from '../../components/ui/Badge';
 import { ScoreBar } from './aiEngineUi';
+import { GuideBox, GuideTip, CollapsibleGuide } from './HowToReadGuide';
 import { useWatchlistScreener, WatchlistScreenerStatus } from './useWatchlistScreener';
 import { ListChecks, Star, ArrowUpRight, ArrowDownRight, RefreshCw, Info } from 'lucide-react';
 
@@ -132,6 +133,42 @@ function WatchlistCard({ rank, stock, status, output, onClick, onToggleFavorite,
   );
 }
 
+function WatchlistHowToReadGuide() {
+  return (
+    <CollapsibleGuide label="Cara Membaca Watchlist AI Mode">
+      <GuideBox color="emerald" badge="TIER" title="Tier Watchlist (dari Skor 0–100)">
+        <p><span className="font-semibold text-emerald-700">ELITE (≥ 90)</span> — kualitas setup terbaik, semua kategori mendukung.</p>
+        <p><span className="font-semibold text-emerald-700">VERY_GOOD (≥ 80)</span> — sangat layak dipantau.</p>
+        <p><span className="font-semibold text-amber-700">WORTH_WATCHING (≥ 70)</span> — cukup menarik, tetap perlu konfirmasi.</p>
+        <p><span className="font-semibold text-red-600">NO_TRADE (&lt; 70)</span> — belum layak masuk watchlist besok.</p>
+      </GuideBox>
+
+      <GuideBox color="blue" badge="SKOR" title="Skor Watchlist Tersusun dari 5 Kategori">
+        <p><span className="font-semibold">Momentum (30%)</span> — kekuatan tren &amp; posisi harga terhadap EMA/RSI/MACD (satu-satunya breakdown yang tampil di kartu bersama Structure).</p>
+        <p><span className="font-semibold">Liquidity (25%)</span> — kecukupan nilai transaksi &amp; volume relatif.</p>
+        <p><span className="font-semibold">Smart Money (20%)</span> — estimasi akumulasi dari RVOL &amp; posisi close (proksi, bukan data broker riil).</p>
+        <p><span className="font-semibold">Structure (15%)</span> — pola higher-high/higher-low dan breakout struktur harga.</p>
+        <p><span className="font-semibold">Risk (10%)</span> — kesehatan volatilitas; skor akhir juga dikurangi penalty jika ada sinyal bahaya.</p>
+      </GuideBox>
+
+      <GuideBox color="red" badge="PENALTY" title="Baris Merah di Bawah Skor">
+        <p>Pengurangan poin dari sinyal risiko spesifik — misalnya gap terlalu besar, terlalu dekat resistance, sinyal distribusi, atau kenaikan harga yang sudah terlalu ekstrem dalam waktu singkat. Semakin banyak penalty, semakin besar kemungkinan skor akhirnya turun ke tier lebih rendah.</p>
+      </GuideBox>
+
+      <GuideBox color="violet" badge="KONTROL" title="Tombol & Filter di Atas Daftar">
+        <p><span className="font-semibold">Jalankan Watchlist Engine</span> — mengambil data historis tiap saham lalu menghitung skor; makin banyak saham, makin lama prosesnya (lihat progress bar).</p>
+        <p><span className="font-semibold">Tampilkan No Trade</span> — jika dicentang, saham dengan tier NO_TRADE ikut ditampilkan (default disembunyikan agar fokus ke kandidat terbaik).</p>
+        <p><span className="font-semibold">Riwayat tidak tersedia / Data {'<'} 60 hari</span> — status saat data historis saham belum cukup untuk dihitung skornya.</p>
+      </GuideBox>
+
+      <GuideTip>
+        <span className="font-semibold">Tip:</span> Jalankan ini setelah market tutup untuk menyusun watchlist besok pagi. Skor tinggi bukan berarti "beli sekarang" —
+        tetap validasi ulang saat market dibuka (candlestick, volume pembukaan) sebelum entry, terutama untuk tier WORTH_WATCHING ke bawah.
+      </GuideTip>
+    </CollapsibleGuide>
+  );
+}
+
 export function WatchlistAiTab({ stocks, loading, onStockClick, onToggleFavorite, favorites }: WatchlistAiTabProps) {
   const [showNoTrade, setShowNoTrade] = useState(false);
   const { results, statusByTicker, progress, isRunning, run } = useWatchlistScreener();
@@ -175,6 +212,8 @@ export function WatchlistAiTab({ stocks, loading, onStockClick, onToggleFavorite
           (08:55–09:10) belum tersedia di aplikasi ini (butuh data orderbook/broker realtime).
         </p>
       </div>
+
+      <WatchlistHowToReadGuide />
 
       <div className="flex items-center justify-between mb-5 bg-white rounded-xl border border-slate-200 p-3.5">
         <div className="text-sm text-slate-600">

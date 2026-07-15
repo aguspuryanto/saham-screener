@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Stock } from '../../../domain/models/Stock';
 import { cn } from '../../../utils/cn';
 import { formatCompactNumber } from '../../../utils/format';
+import { GuideBox, GuideTip, CollapsibleGuide } from './HowToReadGuide';
 import {
   TrendingUp, Zap, ChevronRight, ArrowUpRight, ArrowDownRight,
   Target, Shield, Star, BarChart2, Info, RefreshCw
@@ -265,6 +266,56 @@ const ScannerCard: React.FC<ScannerCardProps> = ({
   );
 };
 
+function ScannerHowToReadGuide({ mode }: { mode: 'swing' | 'scalping' }) {
+  return (
+    <CollapsibleGuide label={`Cara Membaca ${mode === 'swing' ? 'Mode Swing Trade' : 'Mode Pre-Market Scalping'}`}>
+      <GuideBox color="emerald" badge="SKOR" title="Skor Total & Level">
+        <p><span className="font-semibold text-emerald-700">≥ 75 Kuat</span> — sinyal paling meyakinkan.</p>
+        <p><span className="font-semibold text-blue-700">55–74 Cukup</span> — layak dipantau, belum prioritas utama.</p>
+        <p><span className="font-semibold text-amber-700">35–54 Lemah</span> — sinyal campuran, butuh konfirmasi lain.</p>
+        <p><span className="font-semibold text-red-600">&lt; 35 Hindari</span> — belum ada alasan kuat untuk masuk.</p>
+      </GuideBox>
+
+      {mode === 'swing' ? (
+        <GuideBox color="blue" badge="BREAKDOWN" title="Komponen Skor Swing">
+          <p><span className="font-semibold">Momentum</span> — kekuatan tren harga terkini (EMA, RSI, MACD).</p>
+          <p><span className="font-semibold">Breakout</span> — posisi harga vs. high/low tahunan, semakin dekat resistance semakin tinggi.</p>
+          <p><span className="font-semibold">Volume Spike</span> — aktivitas transaksi dibanding kapitalisasi, volume tinggi = minat pasar besar.</p>
+          <p><span className="font-semibold">Fundamental</span> — filter keamanan dari PER &amp; ROE agar tidak masuk saham secara membabi buta.</p>
+        </GuideBox>
+      ) : (
+        <GuideBox color="violet" badge="BREAKDOWN" title="Komponen Skor Scalping">
+          <p><span className="font-semibold">Volatilitas</span> — beta, stdev, dan range harian; scalping butuh gerakan harga yang cukup lebar.</p>
+          <p><span className="font-semibold">Momentum</span> — perubahan 1 hari &amp; frekuensi transaksi intraday.</p>
+          <p><span className="font-semibold">Volume</span> — rasio turnover harian, memastikan saham cukup likuid untuk keluar-masuk cepat.</p>
+        </GuideBox>
+      )}
+
+      <GuideBox color="amber" badge="LEVEL" title="Entry / Target / Stop">
+        <p><span className="font-semibold text-blue-600">Entry</span> — perkiraan harga masuk yang wajar berdasarkan level teknikal.</p>
+        <p><span className="font-semibold text-emerald-600">Target</span> — perkiraan take profit pertama.</p>
+        <p><span className="font-semibold text-red-500">Stop</span> — batas cut loss; keluar jika harga tembus level ini untuk membatasi kerugian.</p>
+      </GuideBox>
+
+      {mode === 'scalping' && (
+        <GuideBox color="blue" badge="INDIKATOR" title="RVOL & RSI(14)">
+          <p><span className="font-semibold">RVOL</span> — volume hari ini dibanding rata-rata; di atas 1x berarti aktivitas trading sedang tinggi.</p>
+          <p><span className="font-semibold">RSI(14)</span> — kekuatan tren 14 hari; &gt;70 mulai jenuh beli (overbought), &lt;30 jenuh jual (oversold).</p>
+        </GuideBox>
+      )}
+
+      <GuideBox color="emerald" badge="PERIODE" title="Perubahan Multi-Periode">
+        <p><span className="font-semibold">1H</span> = 1 Hari, <span className="font-semibold">1M</span> = 1 Minggu, <span className="font-semibold">1B</span> = 1 Bulan, <span className="font-semibold">3B</span> = 3 Bulan — hijau berarti naik, merah berarti turun pada periode tersebut.</p>
+      </GuideBox>
+
+      <GuideTip>
+        <span className="font-semibold">Tip:</span> Pakai <span className="font-semibold">Swing Trade</span> jika tidak bisa memantau layar sepanjang hari (holding 1–3 hari, target 5–15%).
+        Pakai <span className="font-semibold">Scalping</span> hanya jika bisa memantau intraday secara aktif (holding hitungan jam, target 2–5%, stop loss lebih ketat).
+      </GuideTip>
+    </CollapsibleGuide>
+  );
+}
+
 export function ScannerModeTab({ stocks, loading, onStockClick, onToggleFavorite, favorites }: ScannerModeTabProps) {
   const [activeMode, setActiveMode] = useState<'swing' | 'scalping'>('swing');
   const [topN] = useState(10);
@@ -348,6 +399,9 @@ export function ScannerModeTab({ stocks, loading, onStockClick, onToggleFavorite
           </p>
         )}
       </div>
+
+      {/* How to Read Guide */}
+      <ScannerHowToReadGuide mode={activeMode} />
 
       {/* Summary stats */}
       {displayList.length > 0 && (
